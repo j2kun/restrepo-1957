@@ -1,0 +1,717 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+\title{Tactical Problems Involving Several Actions}
+\author{Rodrigo Restrepo \\ Edited by Jeremy Kun}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{observation}{Observation}
+\newtheorem{notation}{Notation}
+
+\begin{document}
+\maketitle
+
+
+[\emph{Editor's note:} This paper seems to have no digital record, despite
+being cited many times in the game theory literature. I was able to obtain a
+printed copy from \emph{Contributions to the Theory of Games, Vol.  III}, 1957,
+which was originally in the library of Bell Laboratories. It was checked out
+three times. I have slightly modified the notation, which was originally
+typeset on a typewriter, to better fit modern LaTeX. I have also added Editor's
+notes (signified as this one) throughout the text to clarify some claims and
+express my own misunderstanding of certain bits. I have tried to do so in a way
+that adds to the paper.]
+
+\section{Introduction}
+
+A zero-sum, two-person game can be defined by a tripler $(X, Y, \Psi)$ where
+$X$ and $Y$ are two closed sets, and $\Psi$ is a real-valued, measurable
+function defined on $X \times Y$; $\Psi$ is called the \emph{pay-off} or
+\emph{utility function}. The elements $x \in X$ and $y \in Y$ are called
+\emph{pure strategies}; the positive measures with total measure $1$ defined
+over $X$ and $Y$ are called (\emph{mixed}) \emph{strategies}. The game has a
+solution if there exist two strategies $F(x)$ and $G(y)$ such that for all $y
+\in Y$,
+
+\[
+    \int \Psi(x, y) dF(x) \geq v,
+\]
+
+and for all $x \in X$,
+
+\[
+    \int \Psi(x, y) dG(y) \leq v.
+\]
+
+$F$ adn $G$ are called \emph{optimal strategies}; $v$ is the \emph{value} of
+the game.
+
+We shall consider a class of games that can be interpreted as tactical
+problems. Each game will represent a context between two players who are trying
+to achieve the same objective. When one of them succeeds, he wins one unit; his
+opponent loses the same amount, and the contest is over. Each player has
+limited resources and can only make a fixed number of attempts to reach his
+goal; these attempts must be made during the interval $0 \leq t \leq 1$, and
+each attempt may fail or succeed. At $t=0$, every attempt fails; at $t=1$,
+every attempt succeeds; at any other time $t$, an attempt made by Player 1 will
+be successful with probability $P(t)$, and will fail with probability $1 -
+P(t)$; an attempt made by Player 2 succeeds with probability $Q(t)$, fails with
+probability $1- Q(t)$; the functions $P$ and $Q$ increase continuously. Each
+player knows these functions and the total number of attempts that his opponent
+can make; however, after the contest begins each player is unable to find out
+how many unsuccessful attempts have been made by his opponent. This description
+can be specialized to a combat between two airplanes: $P$ and $Q$ describe the
+accuracy of firing machinery, and the initial resources correspond to the total
+amount of ammunition that each plane can carry; since it is assumed that each
+pilot is unable to find out how many times his opponent has fired and missed,
+this problem is often called a \emph{silent duel}. In the formal description of
+the game, $x$ and $y$ will be vectors that describe the times when the attempts
+are made; $\Psi(x, y)$ will be the expected gain for Player 1.
+
+A special silent duel was solved by L. S. Shapley. A class of similar problems
+(called Games of Timing) has been studied by M Shiffman and S. Karlin; the
+problems considered in Karlin include a larger class of utility functions, but
+allow only one action by each player. It should be pointed out that the silent
+duels are essentially different from the noisy duels considered by D. Blackwell
+and M. A. Girshick; apparently, the recursive method they used cannot be
+adapted for the solution of our problems.
+
+\section{Description of the optimal strategies}
+
+Each game is characterized by two numbers $m$ and $n$ that denote the total
+number of attempts that each player can make. The solutions are characterized
+by two sets of numbers $a_1, \dots, a_n$ and $b_1, \dots, b_,$ that depend only
+on $P, Q, m,$ and $n$. In every optimal strategoy, the $i$-th action of Player
+1 and the $j$-th action of Player 2 must be carried out during the intervals
+$[a_i, a_{i+1}], [b_j, b_{j+1}]$; in every game, $a_1 = b_1,$ and $a_{n+1} =
+b_{m+1} = 1$.
+
+The optimal strategies are not necessarily unique, but each player has
+precisely one in which all attempts are made independently. In this special
+strategy, Player 1 will make his $i$-th attempt at time $x_i$, chosen at random
+by means of a probability distribution $F_i(x_i)$; $F_n(x_n)$ may have a
+discrete mass $\alpha$ at $x_n = 1$; away from $1$, eah $F_i$ is absolutely
+continuous and has a piecewise continuous density. The discontinuities of the
+densities occur at the points $b_1, \dots b_m$; precisely,
+
+\[
+dF_i(x_i) = \begin{cases}
+h_i f^*(x_i) dx_i & \textup{ if } a_i < x_i < a_{i+1}, \\
+0                 & \textup{ if } x_i \not \in [a_i, a_{i+1}], \\
+\end{cases}
+\]
+
+where
+
+\[
+f^*(t) = \prod_{b_j > t} \left [ 1 - Q(b_j) \right ] \frac{Q'(t)}{Q^2(t) P(t)}.
+\]
+
+The constants $h_i$ and $h_{i+1}$ are related by the equation
+
+\[
+h_i = [1 - D_i] h_{i+1},
+\]
+
+where
+
+\[
+D_i = \int_{a_i}^{a_{i+1}} P(t) dF_i(t).
+\]
+
+Player 2 has a similar strategy that can be described in an analogous way. It
+is sufficient to interchange the roles of $P, Q, a_i$ and $b_j$ in the previous
+description.
+
+EXAMPLE. Symmetric Game: $P(t) = Q(t),$ and $n = m$. In this case the two
+players have the same optimal strategies; $\alpha = 0$, and $a_k = b_k, k=1,
+\dots, n$. Furthermore
+
+\[
+\begin{aligned}
+P(a_n-k) &= \frac{1}{2k-3} & k = 0, 1, \dots, n-1, \\
+dF_{n-k}(t) &= \frac{1}{4(k+1)} \frac{P'(t)}{P^3(t)} dt & a_{n-k} < t <
+a_{n-k+1}.
+\end{aligned}
+\]
+
+\section{Definitions of $X, Y, P, Q$ and $\Psi$}
+
+$X$ and $Y$ are defined as
+
+\[
+\begin{aligned}
+   X &= \{ x \in E^n \mid 0 \leq x_1 \leq x_2 \leq \dots \leq x_n \leq 1 \} \\
+   Y &= \{ y \in E^m \mid 0 \leq y_1 \leq y_2 \leq \dots \leq y_m \leq 1 \}.
+\end{aligned}
+\]
+
+$E^n$ and $E^m$ denote the $n$ and $m$-dimensional Euclidean spaces.
+
+$P$ and $Q$ will be real-valued, continuously differentiable functions
+defined on the interval $[0,1]$. They must satisfy the following conditions,
+stated just for $P$:
+
+\[
+\begin{aligned}
+P(0) &= 0 \\ P(1) &= 1 \\ P'(t) &> 0 \textup{ for } 0 < t < 1
+\end{aligned}
+\]
+
+The symbols $z, r(z_k), s(z_k), \Psi(z)$ are defined only when $x \in X$ and
+$y \in Y$ are two vectors such that $x_i \neq y_j$, all $i, j$. Then $z$
+denotes the vector whose components are the numbers $x_1, \dots, y_m$,
+re-arranged in increasing order; for $k = 1, \dots, n+m$, either $z_k = x_i$
+(for some $i$), or $z_k = y_j$ (for some $j$), but not both. Thus
+
+\[
+r(z_k) = \begin{cases}
+P(x_i) & \textup{ if } z_k = x_i, \\
+-Q(y_j) & \textup{ if } z_k = y_j;
+\end{cases}
+\]
+
+and
+
+\[
+s(z_k) = \begin{cases}
+P(x_i) & \textup{ if } z_k = x_i, \\
+Q(y_j) & \textup{ if } z_k = y_j;
+\end{cases}
+\]
+
+are well defined functions. Finally, $\Psi(z)$ is defined recursively as
+follows:
+
+\[
+\begin{aligned}
+\Psi(z_1, \dots, z_k) &= r(z_1) + [1 - s(z_1)] \Psi(z_2, \dots, z_k) \\
+\Psi(z_2, \dots, z_k) &= r(z_2) + [1 - s(z_2)] \Psi(z_3, \dots, z_k) \\
+& \vdots \\
+\Psi(z_k) &= r(z_k).
+\end{aligned}
+\]
+
+[\emph{Editor's note:} The formulas above literally encode the logical formula
+``The player who acts at time $z_1$ succeeds at $z_1$ OR (That player acts but
+misses at $z_1$ AND the next player to act succeeds at time $z_2$
+OR($\dots$)).'' The alternating between $r$ and $s$ is to ensure that all
+successful actions pay (expected) utility to Player 1. If Player 2 wins, it's a
+negative payoff to Player 1. The $s$ is needed to ensure failed actions
+represent probabilities.]
+
+The number of components in $x$ and $y$ is not essential, and the definition
+can be applied to a single vector $x \in X$, or to a single vector $y \in Y$.
+In this case one may say that the other vector has no components.
+
+The pay-off function $\Psi(x, y)$ is defined as follows: if each component
+of $x$ is different from each component of $y$, then
+
+\[
+    \Psi(x, y) = \Psi(z)
+\]
+
+where $\Psi(z)$ is the number defined above. If the given condition is not
+satisfied, then
+
+\[
+    \Psi(\overline{x}, \overline{y}) = \frac{1}{2}
+    [\Psi(\overline{x + 0}, \overline{y - 0}) +
+    \Psi(\overline{x - 0}, \overline{y + 0})
+    ]
+\]
+
+[\emph{Editor's note:} Restrepo uses overlines for vectors (which I have omitted
+except in the above formula). I have not see his notation $\overline{x \pm 0}$
+before. I am tempted to interpret that the author means to say, ``When $x$ and
+$y$ contain the same value, $\Psi(x,y)$ is the expected payoff when
+constructing $z$ by breaking ordering ties randomly.'']
+
+\section{Some properties of $\Psi(x, y)$}
+
+$\Psi(x, y)$ is continuous as long as the relative order of the components of
+$x$ and $y$ does not change. Furthermore, $\Psi(x, y)$ is skew-symmtric in the
+following sense: if the roles of $X$ and $Y$ are interchanged, $\Psi(y, x) =
+-\Psi(x, y)$. Other simple properties of $\Psi$ are given in the next three
+lemmas.
+
+\begin{lemma} \label{lemma:psi-recursive}
+
+If $z = (z_1, \dots, z_t, z_{t+1}, \dots, z_k)$, then
+
+\[
+\Psi(z) = \Psi(z_1, \dots, z_t) +
+\prod_{i=1}^t [1-s(z_i)] \Psi(z_{t+1}, \dots, z_k)
+\]
+
+\end{lemma}
+
+\begin{proof}
+
+If $t = 1$, the formula reduces to the definition of $\Psi(z)$. For $t > 1$,
+the formula is proved by induction. The details are omitted.
+
+[\emph{Editor's note:} While the above follows from induction and some algebra,
+it is perhaps easier to prove it in words: the payoff of the whole game is the
+payoff of the first $t$ steps, provided some action taken in those steps
+succeeds, OR, the payoff in the last $k - t$ steps, provided \emph{no} action
+taken in the first $t$ steps succeeds.]
+
+\end{proof}
+
+\begin{lemma} \label{lemma:psi-remove-one}
+
+If $z = (z_1, \dots, z_{t-1}, z_t, z_{t+1}, \dots, z_k)$, then
+
+\[
+\begin{aligned}
+\Psi(z) &= \Psi(z_1, \dots, z_{t-1}, z_{t+1}, \dots, z_k)  \\
+&+ \prod_{i=1}^{t-1} [1 - s(z_i)] [r(z_t) - s(z_t) \Psi(z_{t+1}, \dots, z_k)]
+\end{aligned}
+\]
+
+\end{lemma}
+
+\begin{proof}
+
+By Lemma~\ref{lemma:psi-recursive},
+
+\[
+\Psi(z) = \Psi(z_1, \dots, z_{t-1}) +
+\prod_{i=1}^{t-1} [1-s(z_i)] \Psi(z_t, \dots, z_k),
+\]
+
+and
+
+\[
+\Psi(z_t, \dots, z_k) +
+r(_t) + [1-s(z_i)] \Psi(z_{t+1}, \dots, z_k).
+\]
+
+Therefore,
+
+\[
+\begin{aligned}
+\Psi(z) &= \Psi(z_1, \dots, z_{t-1}) +
+\prod_{i=1}^{t-1} [1 - s(z_i)] \Psi(z_{t+1}, \dots, z_k) \\
+&+ \prod_{i=1}^{t-1} [1 - s(z_i)] [r(z_t) - s(z_t) \Psi(z_{t+1}, \dots, z_k)]
+\end{aligned}
+\]
+
+Lemma~\ref{lemma:psi-recursive} shows that the first two terms can be replaced
+by \\ $\Psi(z_1, \dots, z_{t-1}, z_{t+1}, \dots, z_k)$.
+
+\end{proof}
+
+
+\begin{lemma} \label{lemma:psi-monotone-increasing}
+
+For any fixed $y$, $\Psi(x, y)$ is a monotone increasing function of each
+component $x_i$ of $x$ as long as $x_i$ ranges over an open interval that does
+not contain any components of $y$. Similarly, for any fixed $x$, $\Psi(x, y)$
+is a monotone decreasing function of each component $y_j$ of $y$ as long as
+$y_j$ ranges over an open interval that does not contain any components of $x$.
+
+[\emph{Editor's note:} Restated, fixing Player 2's strategy, in considering the
+action time for action $i$, it is better for Player 1 to wait as long as
+possible before acting, as their probability of success increases over time.
+This is not true if Player 1 waits so long that Player 2 gets to act, because
+Player 2 may succeed. But so long as that doesn't happen, Player 1's expected
+utility increases.]
+
+\end{lemma}
+
+\begin{proof}
+
+Since $\Psi(x, y)$ is skew-symmetric in $x$ and $y$, it is sufficient to prove
+only the first half of the lemma. The result is established by means of
+Lemma~\ref{lemma:psi-remove-one}. Indeed, any component of $x_i$ appears only
+in the term
+
+\[
+    \prod_{k=1}^{i-1} [1 - P(x_k)] \prod_{y_j < x_i} [1 - Q(y_j)] [P(x_i) -
+P(x_i) \Psi(z^*)],
+\]
+
+where $z^*$ is the vector constructed from those components of $x$ and $y$ that
+are larger than $x_i$. It is clear that the first two factors are positive;
+furthermore $-1 \leq \Psi(z) \leq 1$, for all $z$. Thus the coefficient of
+$P(x_i)$ is positive, and $\Psi(x, y)$ is a monotone increasing function fo
+$x_i$.
+
+\end{proof}
+
+\section{Strategies of the class $O$}
+
+\begin{definition} \label{defn:class-o}
+
+A strategy $F(x)$ belongs to the class $O$ if it satisfies the following
+conditions:
+
+\begin{enumerate}
+
+\item $F$ is separate, i.e.
+
+\[
+    F(x) = \prod_{i=1}^n F_i(x_i).
+\]
+
+\item Each $F_i$ is a positive measure with total mass $1$; furthermore, the
+support of each $F_i$ (i.e., the complement of the largest open set on which
+$F_i$ vanishes) is a non-degenerate interval $[a_i, a_{i+1}]$; also, $a_1 > 0$,
+and $a_{n+1} = 1$.
+
+\item The first $n-1$ measures are continuous; the last measure $F_n$ may have
+only one discontinuity with mass $\alpha$ at $x_n = 1$.
+
+\end{enumerate}
+
+Equivalent conditions are used when dealing with measures $G(y)$ defined over
+$Y$.
+
+\end{definition}
+
+\begin{notation}
+
+In the following sections, $D_i$ and $R(y)$ will always denote the expected
+values of $P$ and $\Psi$. That is,
+
+\[
+\begin{aligned}
+D_i &= \int_{a_i}^{a_{i+1}} P(t) dF_i(t) \\
+R(y) &= \int \Psi(x,y) dF(x).
+\end{aligned}
+\]
+
+\end{notation}
+
+The vector $D^k$ and the function $\phi(D^k)$ are defined as follows:
+
+\[
+\begin{aligned}
+D^k &= (D_{k+1}, D_{k+2}, \dots, D_n) \\
+\phi(D^{k-1}) &= D_k + [1 - D_k] \phi(D^k) \\
+& \dots \\
+\phi(D^{n}) &= 0.
+\end{aligned}
+\]
+
+Using the last definition, it is easy to see that
+
+\[
+\int \Psi(x_{k+1}, \dots, x_n) dF_{k+1}(x_{k+1}) \dots dF_n(s_n)
+= \phi(D^k).
+\]
+
+\begin{lemma} \label{lemma:marginal-r-formula}
+
+Let $F(x)$ be in the class $O$, and let $y \in Y$ be a vector whose last
+component $y_m$ is contained in the open interval $(a_k, a_{k+1})$. Then
+
+\[
+\begin{aligned}
+& R(y_1, \dots, y_{m-1}, y_m) - R(y_1, \dots, y_{m-1}) \\
+&= \prod_{i=1}^{k-1} [1 - D_i] \prod_{j=1}^{m-1} [1 - Q(y_j)][-Q(y_m)] \cdot \\
+&\cdot \left \{
+  2 \int_{y_m}^{a_{k+1}} P(x_k) dF_k(x_k) + [1 - D_k][1 + \phi(D^k)]
+\right \}.
+\end{aligned}
+\]
+
+\end{lemma}
+
+\begin{proof}
+
+Let $y$ be the given vector and let $x = (x_1, \dots, x_n)$ be any vector
+contained in the support of $F(x)$. Lemma~\ref{lemma:psi-remove-one} can be
+used to separate all the terms of $\Psi(x, y)$ that depend on $y_m$; thus, if
+$a_k \leq x_k < y_m$,
+
+\[
+\begin{aligned}
+&\Psi(x, (y_1, \dots, y_{m-1}, y_m)) - \Psi(x, (y_1, \dots, y_{m-1})) \\
+&= \prod_{i=1}^k [1 - P(x_i)] \prod_{j=1}^{m-1} [1 - Q(y_j)][-Q(y_m)]
+[1 + \Psi(x_{k+1}, \dots, x_n)].
+\end{aligned}
+\]
+
+But if $y_m < x_k \leq a_{k+1}$, [Editor's note: the only difference is the
+very last term includes $x_k$.]
+
+\[
+\begin{aligned}
+&\Psi(x, (y_1, \dots, y_{m-1}, y_m)) - \Psi(x, (y_1, \dots, y_{m-1})) \\
+&= \prod_{i=1}^k [1 - P(x_i)] \prod_{j=1}^{m-1} [1 - Q(y_j)][-Q(y_m)]
+[1 + \Psi(x_k, x_{k+1}, \dots, x_n)].
+\end{aligned}
+\]
+
+The vectors $x$ with $x_k = y_m$ have $F$-measure zero. Therefore,
+
+[For brevity, define:
+
+\[
+A = \prod_{i=1}^{k-1} (1 - D_i) \prod_{j=1}^{m-1} (1 - Q(y_j))(-Q(y_m)).
+\]
+
+Then:]
+
+\[
+\begin{aligned}
+& R(y_1, \dots, y_{m-1}, y_m) - R(y_1, \dots, y_{m-1}) \\
+&= \int [\Psi(x, (y_1, \dots, y_{m-1}, y_m)) - \Psi(x, (y_1, \dots, y_{m-1}))] dF(x) \\
+&= A \int_{a_k}^{y_m} [1 - P(x_k)][1 + \phi(D^k)] dF_k(x_k)
++ A \int_{y_m}^{a_{k+1}} [1 + P(x_k) + (1 - P(x_k)) \phi(D^k)] dF_k(x_k) \\
+&= 2A \int_{y_m}^{a_{k+1}} \left [
+    P(x_k) dF_k(x_k) + [1 - D_k][1 + \phi(D^k)]
+\right ].
+\end{aligned}
+\]
+
+\end{proof}
+
+\begin{lemma} \label{lemma:r-is-continuous}
+
+If $F$ belongs to the class $O$, $R(y)$ is a continuous function of $y$, except
+when $y_m = 1$.
+
+\end{lemma}
+
+\begin{proof}
+
+The result follows from the fact that $\Psi(x, y)$ has only simple
+discontinuities located on the diagonals $x_i = y_j$; $F$ is continuous except
+at $x_n = 1$. An alternate proof may be based on the fact that the right-hand
+side of the last equation varies continuously as $y_m$ increases from $a_k -
+\varepsilon$ to $a_k + \varepsilon$.
+
+\end{proof}
+
+\section{Corresponding strategies}
+
+\begin{definition} \label{defn:corresponding-strategies}
+
+Let $F(x)$ and $G(y)$ be two measures contained in the class $O$, and let $S_f$
+and $S_G$ denote the supports of their measures. $F$ and $G$ form a pair of
+corresponding strategies if
+
+\[
+\int \Psi(x, y) dF(x) = v, \qquad \textup{ for all } y \in S_G, y_m \neq 1
+\]
+
+and
+
+\[
+\int \Psi(x, y) dG(x) = v, \qquad \textup{ for all } x \in S_F, x_n \neq 1
+\]
+
+\end{definition}
+
+\begin{notation}
+
+Since $F$ and $G$ belong to the class $O$,
+
+\[
+F(x) = \prod_{i=1}^n F_i(x_i), \qquad G(y) = \prod_{j=1}^m G_j(y_j),
+\]
+
+and the supports of $F_i$ and $G_j$ are intervals $[a_i, a_{i+1}], [b_j,
+b_{j+1}]$. The numbers $b_1, \dots, b_m$ can be rearranged into subsets, one
+subset for each interval $[a_i, a_{i+1}]$; the resulting array can be written
+in the form
+
+\[
+\begin{aligned}
+a_1 &\leq b_{1,1} < b_{1, 2} < \dots < b_{1, r_1} < a_2 \\
+a_2 &\leq b_{2,1} < b_{2, 2} < \dots < b_{2, r_2} < a_3 \\
+\vdots & \\
+a_n &\leq b_{n,1} < b_{n, 2} < \dots < b_{n, r_n} < a_{n+1} = 1.
+\end{aligned}
+\]
+
+It is possible that there are no $b$'s between two adjacent $a$'s.
+
+Every interval bounded by two adjacent $b$'s must contain precisely one
+component of each vector $y \in S_G$. It is possible to identify the component
+by means of the interval over which it ranges; for instance, $y_{i,j}$ will
+denote the component of $y$ that is contained in the interval $[b_{i,j}, b_{i,
+j+1}]$. When two adjaceny $b$'s are separated by one of the $a$'s, say $a_i$,
+it is convenient to write
+
+\[
+    a_i = b_{i, 0}.
+\]
+
+In this case, $y_{i-1, r_{i-1}}$ and $y_{i, 0}$ denote the same component of
+$y$.
+
+\end{notation}
+
+In the following lemma, $\alpha$ denotes the discrete mass that $F_n(x_n)$ may
+have at $x_n = 1$.
+
+\begin{lemma} \label{lemma:coefficient-equations}
+
+Let $F(x)$ and $G(y)$ be two strategies contained in the class $O$. Then
+
+\[
+\int \Psi(x, y) dF(x) = v, \qquad \textup{ for all } y \in S_G, y_m \neq 1
+\]
+
+if and only if the following conditions hold simultaneously:
+
+\begin{enumerate}
+
+\item In the open interval $(b_{i, j}, b_{i, j+1})$, the measure $F_i(x_i)$ is
+absolutely continuous and
+
+\[
+dF_i(x_i) = h_{i, j} \frac{Q'(x_i)}{Q^2(x_i) P(x_i)} dx_i.
+\]
+
+\item The coefficients $h_{i, j}$ satisfy the equations
+
+\[
+\begin{aligned}
+1 + 2\alpha &= D_n + 2h_{n, r_n} \\
+h_{i, j-1} &= [1 - Q(b_{i, j})] h_{i, j}, \qquad j = 1, \dots, r_i; i = 1,
+\dots, n \\
+h_{i, r_i} &= [1 - D_i] h_{i+1, 0}, \qquad i = 1, \dots, n.
+\end{aligned}
+\]
+
+\end{enumerate}
+
+The first condition requires that $a_1 \leq b_1$.
+
+\end{lemma}
+
+\begin{proof}
+
+Let $y = (y_{1, 1}, \dots, y_{n, r_n})$ be any vector in $S_G$, and define
+
+\[
+K_{i,j} = \prod_{s=1}^{i-1} [1 - D_s]
+          \prod_{y_{s, t} < y_{i, j}} [1 - Q(y_{s, t})],
+\]
+
+where the second product is taken over all the components of $y$ that precede
+$y_{i, j}$. By Lemma~\ref{lemma:marginal-r-formula},
+
+\begin{align}
+R(y) &= R(y_{1, 1}, \dots, y_{n, r_n - 1}) \label{eqn:six-one} \\
+ &- K_{n, r_n} Q(y_{n, r_n})
+\left [ 2 \int_{y_{n, r_n}}^1 P(x_n) dF_n(x_n) + (1 - D_n) \right ]. \notag
+\end{align}
+
+Therefore, $R(y)$ is independent of $y_{n, r_n}$ if and only if
+
+\begin{align}
+Q(y_{n, r_n})
+\left [ 2 \int_{y_{n, r_n}}^1 P(x_n) dF_n(x_n) + (1 - D_n) \right ] &= 2h_{n,
+r_n}, \label{eqn:six-one-a} \\
+& \textup{ for all } b_{n, r_n} < y_{n, r_n} < 1, \notag
+\end{align}
+
+for some constant $h_{n, r_n}$; furthermore, if~\eqref{eqn:six-one-a} holds,
+equation~\eqref{eqn:six-one} becomes
+
+\begin{equation} \label{eqn:six-one-b}
+R(y) = R(y_{1, 1}, \dots, y_{n, r_n-1}) - 2K_{n, r_n} h_{n, r_n}.
+\end{equation}
+
+The dependence of $R(y)$ on the component $y_{i,j}$ is studied by successive
+applications of Lemma~\ref{lemma:marginal-r-formula}; two cases must be
+considered.
+
+\textbf{Case 1}. $j \neq r_i$. Let us assume that if $R(y)$ is independent of
+all the components of $y$ that lie beyond $y_{i, j}$, then
+
+\begin{equation} \label{eqn:six-second-b}
+R(y) = R(y_{1, 1}, \dots, y_{i, j}) - 2K_{i, j+1} \gamma_{i, j+1}
+\end{equation}
+
+for some constant $\gamma_{i, j+1}$. Then, by definition,
+
+\[
+K_{i, j+1} = [1 - Q(y_{i,j})] K_{i,j}.
+\]
+
+Furthermore, Lemma~\ref{lemma:marginal-r-formula} can be applied to $R(y_{1,
+1}, \dots, y_{i, j})$. Then
+
+\[
+\begin{aligned}
+R(y) &= R(y_{1, 1}, \dots, y_{i, j-1}) - 2K_{i, j} \gamma_{i, j+1} \\
+&- K_{i, j} Q(y_{i, k}) \left [
+2 \int_{y_{i, j}}^{a_{i+1}} P(x_i) dF_i(x_i) + (1-D_i)(1 + \phi(D^1)) - 2
+\gamma_{i, j+1}
+\right ].
+\end{aligned}
+\]
+
+Therefore, $R(y)$ is also independent of $y_{i, j}$ if and only if
+
+\begin{align}
+Q(y_{i, j}) &
+\left [
+2 \int_{y_{i, j}}^{a_{i+1}} P(x_i) dF_i(x_i) + (1 - D_i) (1 + \phi(D^i)) -
+2\gamma_{i, j+1}
+\right ] \label{eqn:six-second-a} \\
+&= 2h_{i, j}, \textup{ for all } b_{i, j} < y_{i, j} < b_{i, j+1}, \notag
+\end{align}
+
+for some constant $h_{i, j}$; furthermore, if \eqref{eqn:six-second-b} is valid
+for the indices $i, j+1$, and \eqref{eqn:six-second-a} is valid for the indices
+$i, j$, then
+
+\[
+R(y) = R(y_{1, 1}, \dots, y_{i, j-1}) - 2K_{i, j} \gamma_{i, j}
+\]
+
+where
+
+\begin{equation}
+\gamma_{i, j} = h_{i,j} + \gamma_{i, j+1}.
+\end{equation}
+
+This result justifies the assumption~\eqref{eqn:six-second-b}, provided that
+$i$ is fixed.
+
+\textbf{Case 2}. $j = r_i$. In the present notation $y_{i, r_i}$ and $y_{i+1,
+0}$ denote the same component of $y$; as a matter of fact, if two adjacent
+$b$'s are separated by $a_{i+1}, \dots, a_{i + k'}$, the component of $y$ that
+follows $y_{i, r_i}$ is $y_{i+k, 1}$. The process outlined in Case 1 shows that
+if $R(y)$ is independent of the components of $y$ that lie beyond $y_{i,
+r_i}$, then
+
+\[
+R(y) = R(y_{1, 1}, \dots, y_{i, r_i}) - 2K_{i+k, 1} \gamma_{i+k, 1}.
+\]
+
+The arguments that were used in the previous case can be applied again, but in
+this case
+
+\[
+K_{i+k, 1} = \prod_{t=i}^{i+k-1} (1 - D_t) (1 - Q(y_{i, r_i})) K_{i, r_i}
+\]
+
+and $R(y)$ is independent of $y_{i, r_i}$, if and only if
+
+
+
+\end{proof}
+
+\bibliographystyle{plain}
+\bibliography{main}
+
+\end{document}

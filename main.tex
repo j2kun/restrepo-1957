@@ -33,7 +33,7 @@ that adds to the paper.]
 
 \section{Introduction}
 
-A zero-sum, two-person game can be defined by a tripler $(X, Y, \Psi)$ where
+A zero-sum, two-person game can be defined by a triplet $(X, Y, \Psi)$ where
 $X$ and $Y$ are two closed sets, and $\Psi$ is a real-valued, measurable
 function defined on $X \times Y$; $\Psi$ is called the \emph{pay-off} or
 \emph{utility function}. The elements $x \in X$ and $y \in Y$ are called
@@ -52,7 +52,7 @@ and for all $x \in X$,
     \int \Psi(x, y) dG(y) \leq v.
 \]
 
-$F$ adn $G$ are called \emph{optimal strategies}; $v$ is the \emph{value} of
+$F$ and $G$ are called \emph{optimal strategies}; $v$ is the \emph{value} of
 the game.
 
 We shall consider a class of games that can be interpreted as tactical
@@ -90,7 +90,7 @@ adapted for the solution of our problems.
 Each game is characterized by two numbers $m$ and $n$ that denote the total
 number of attempts that each player can make. The solutions are characterized
 by two sets of numbers $a_1, \dots, a_n$ and $b_1, \dots, b_,$ that depend only
-on $P, Q, m,$ and $n$. In every optimal strategoy, the $i$-th action of Player
+on $P, Q, m,$ and $n$. In every optimal strategy, the $i$-th action of Player
 1 and the $j$-th action of Player 2 must be carried out during the intervals
 $[a_i, a_{i+1}], [b_j, b_{j+1}]$; in every game, $a_1 = b_1,$ and $a_{n+1} =
 b_{m+1} = 1$.
@@ -99,7 +99,7 @@ The optimal strategies are not necessarily unique, but each player has
 precisely one in which all attempts are made independently. In this special
 strategy, Player 1 will make his $i$-th attempt at time $x_i$, chosen at random
 by means of a probability distribution $F_i(x_i)$; $F_n(x_n)$ may have a
-discrete mass $\alpha$ at $x_n = 1$; away from $1$, eah $F_i$ is absolutely
+discrete mass $\alpha$ at $x_n = 1$; away from $1$, each $F_i$ is absolutely
 continuous and has a piecewise continuous density. The discontinuities of the
 densities occur at the points $b_1, \dots b_m$; precisely,
 
@@ -231,7 +231,7 @@ satisfied, then
 \]
 
 [\emph{Editor's note:} Restrepo uses overlines for vectors (which I have omitted
-except in the above formula). I have not see his notation $\overline{x \pm 0}$
+except in the above formula). I have not seen his notation $\overline{x \pm 0}$
 before. I am tempted to interpret that the author means to say, ``When $x$ and
 $y$ contain the same value, $\Psi(x,y)$ is the expected payoff when
 constructing $z$ by breaking ordering ties randomly.'']
@@ -239,7 +239,7 @@ constructing $z$ by breaking ordering ties randomly.'']
 \section{Some properties of $\Psi(x, y)$}
 
 $\Psi(x, y)$ is continuous as long as the relative order of the components of
-$x$ and $y$ does not change. Furthermore, $\Psi(x, y)$ is skew-symmtric in the
+$x$ and $y$ does not change. Furthermore, $\Psi(x, y)$ is skew-symmetric in the
 following sense: if the roles of $X$ and $Y$ are interchanged, $\Psi(y, x) =
 -\Psi(x, y)$. Other simple properties of $\Psi$ are given in the next three
 lemmas.
@@ -345,7 +345,7 @@ P(x_i) \Psi(z^*)],
 where $z^*$ is the vector constructed from those components of $x$ and $y$ that
 are larger than $x_i$. It is clear that the first two factors are positive;
 furthermore $-1 \leq \Psi(z) \leq 1$, for all $z$. Thus the coefficient of
-$P(x_i)$ is positive, and $\Psi(x, y)$ is a monotone increasing function fo
+$P(x_i)$ is positive, and $\Psi(x, y)$ is a monotone increasing function of
 $x_i$.
 
 \end{proof}
@@ -444,8 +444,8 @@ $a_k \leq x_k < y_m$,
 \end{aligned}
 \]
 
-But if $y_m < x_k \leq a_{k+1}$, [Editor's note: the only difference is the
-very last term includes $x_k$.]
+But if $y_m < x_k \leq a_{k+1}$, [\emph{Editor's note:} the only difference is
+the very last term includes $x_k$.]
 
 \[
 \begin{aligned}
@@ -457,7 +457,7 @@ very last term includes $x_k$.]
 
 The vectors $x$ with $x_k = y_m$ have $F$-measure zero. Therefore,
 
-[For brevity, define:
+[\emph{Editor's note:} For brevity, define:
 
 \[
 A = \prod_{i=1}^{k-1} (1 - D_i) \prod_{j=1}^{m-1} (1 - Q(y_j))(-Q(y_m)).
@@ -544,7 +544,7 @@ Every interval bounded by two adjacent $b$'s must contain precisely one
 component of each vector $y \in S_G$. It is possible to identify the component
 by means of the interval over which it ranges; for instance, $y_{i,j}$ will
 denote the component of $y$ that is contained in the interval $[b_{i,j}, b_{i,
-j+1}]$. When two adjaceny $b$'s are separated by one of the $a$'s, say $a_i$,
+j+1}]$. When two adjacent $b$'s are separated by one of the $a$'s, say $a_i$,
 it is convenient to write
 
 \[

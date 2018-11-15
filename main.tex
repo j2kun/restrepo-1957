@@ -17,6 +17,8 @@
 \newtheorem{observation}{Observation}
 \newtheorem{notation}{Notation}
 
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+
 \begin{document}
 \maketitle
 
@@ -653,7 +655,7 @@ Furthermore, Lemma~\ref{lemma:marginal-r-formula} can be applied to $R(y_{1,
 \begin{aligned}
 R(y) &= R(y_{1, 1}, \dots, y_{i, j-1}) - 2K_{i, j} \gamma_{i, j+1} \\
 &- K_{i, j} Q(y_{i, k}) \left [
-2 \int_{y_{i, j}}^{a_{i+1}} P(x_i) dF_i(x_i) + (1-D_i)(1 + \phi(D^1)) - 2
+2 \int_{y_{i, j}}^{a_{i+1}} P(x_i) dF_i(x_i) + (1-D_i)(1 + \phi(D^i)) - 2
 \gamma_{i, j+1}
 \right ].
 \end{aligned}
@@ -705,9 +707,159 @@ this case
 K_{i+k, 1} = \prod_{t=i}^{i+k-1} (1 - D_t) (1 - Q(y_{i, r_i})) K_{i, r_i}
 \]
 
-and $R(y)$ is independent of $y_{i, r_i}$, if and only if
+and $R(y)$ is independent of $y_{i, r_i}$, if and only if [for all $y_{i, r_i}$
+between $b_{i, r_i}$ and $a_{i+1}$, and letting $\varphi_i = (1-D_i)(1 +
+\phi(D^i))$,]
+
+\begin{equation}
+ 2h_{i,r_i} = Q(y_{i,r_i}) \left [ 2 \int_{y_{i,r_i}}^{a_{i+1}} P(x_i) dF_i(x_i)
++ \varphi_i - 2 \prod_{t=i}^{i+k-1} (1-D_t) \gamma_{i+k, 1} \right ] \label{eqn:six-third-a}
+\end{equation}
+
+for some constant $h_{i,r_i}$; when equation~\ref{eqn:six-third-a} holds, $R(y)$
+can be written in the form
+
+\begin{equation}
+R(y) = R(y_{1,1}, \dots, y_{i, r_i - 1}) - 2K_{i, r_i} \gamma_{i, r_i}
+\label{eqn:six-third-b}
+\end{equation}
+
+with
+
+\begin{equation}
+\gamma_{i, r_i} = h_{i, r_i} + \prod{t=i}^{i+k-1} (1-D_t) \gama_{i+k, 1}.
+\label{eqn:six-three}
+\end{equation}
+
+These considerations show that $R(y)$ is independent of $y$ if and only if
+condition~\ref{eqn:six-third-a} holds for every pair of indices $i, j$.  In the
+special case $i=1, j=r_{n'}$, the given condition can also be written in the
+form
+
+\[
+Q(y_{n,r_n}) \left [ 2 \int_{y_{n,r_n}}^{1} P(x_n) dF_n^*(x_n)
++ 2 \alpha + 1 - 2 D_n \right ] = 2h_{n,r_n},
+\]
+
+where $F_n^*$ is the continuous part of $F_n$; every one of these conditions is
+of the form
+
+\[
+2 \int_{t}^{a_{i+1}} P(x) dF_i(x) + C = \frac{2h_{i, j}}{Q(t)},
+\qquad b_{i,j} < t < b_{i, j+1},
+\]
+
+with $F_i$ continuous and $C$ constant. An integration by parts shows that
+$F_i$ must be absolutely continuous in the given interval, and then, by
+differentiation,
+
+\begin{equation}
+dF_i(t) = h_{i,j} \frac{Q'(t)}{Q^2(t) P(t)} dt, \qquad b_{i,j} < t < b_{i, j+1}.
+\label{eqn:six-third-c}
+\end{equation}
+
+The integral that appears in each one of those conditions
+\label{eqn:six-third-a} can be evaluated explicitly by means of
+\label{eqn:six-third-c}; it is then seen that \label{eqn:six-third-a} holds if
+and only if \label{eqn:six-third-c} holds and also
+
+\begin{equation}
+\begin{split}
+2h_{n, r_n} &= 2\alpha + 1 - D_n \\
+\frac{2h_{i,j}}{Q(b_{i, j+1})} &= 2 \int_{b_{i, j+1}}^{a_{i+1}} P(x_i) dF_i(x_i) \\
+&+ (1-D_i)(1 + \phi(D^i)) - 2 \gamma_{i, j+1}, \qquad j \neq r_i  \\
+\frac{2h_{i,r_i}}{Q(a_{i+1})} &=
+(1-D_i)(1 + \phi(D^i)) - 2 \prod_{t=i}^{i+k-1} (1-d_t) \gamma_{i+k, 1}, \qquad j
+= r_i.
+\end{split}
+\label{eqn:six-d}
+\end{equation}
+
+In order to complete the proof of the lemma it is sufficient to replace this
+system of equations by the equivalent system that is obtained by subtracting
+from each equation the preceding one; for instance, if the equation that
+contains $h_{i, j+1}$ is subtracted from the equation that contains $h_{i,j}$,
+then
+
+\[
+\begin{aligned}
+\frac{2h_{i,j}}{Q(b_{i, j+1})}
+- \frac{2h_{i,j+1}}{Q(b_{i, j+2})}
+&= \\
+&= 2 \int_{b_{i, j+1}}^{b_{i, j+2}} P(x_i)dF_i(x_i) + 2\gamma_{i, j+2} -
+2\gamma_{i, j+1} \\
+&= 2h_{i, j+1} \left [
+    \frac{1}{Q(b_{i, j+1})} - \frac{1}{Q(b_{i, j+2})}
+\right ] - 2h_{i, j+1}.
+\end{aligned}
+\]
+
+Simplifying,
+
+\[
+h_{i,j} = [1 - Q(b_{i, j+1})] h_{i, j+1}.
+\]
+
+Similarly, the equations that contain $h_{i, r_i}$ and $h_{i+1, 0}$ show that
+
+\[
+h_{i, r_i} = (1 - D_i) h_{i+1, 0}.
+\]
+
+It may happen that one of the original $a_i$'s coincides with one of the
+original $b_j$'s, say $a_{i+1} = b_{i+1, 1}$. In this case, the system
+\ref{eqn:six-d} does not contain an equation with $h_{i+1, 0}$ and the last
+derivation is not valid. However, subtracting in this case the equation with
+$h_{i, r_i}$ from the equation with $h_{i+1, 1}$, one can see that
+
+\[
+h_{i, r_i} = (1 - D_i)[1 - Q(a_{i+1})] h_{i+1, 1}.
+\]
+
+In this case i tis convenient to introduce the unnecessary parameter $h_{i+1,
+0}$ defined by
+
+\[
+h_{i+1, 0} = [1 - Q(a_{i+1})]h_{i+1, 1} = [1-Q(b_{i+1, 1})]h_{i+1, 1},
+\]
+
+if $a_{i+1} = b_{i+1, 1}$. With this definition, $h_{i, r_i}$, $h_{i+1, 0}$,
+and $h_{i+1, 1}$ are always related by the equations stated in the lemma.
+
+\end{proof}
 
 
+\begin{lemma} \label{lemma:value-of-the-game}
+
+Let $F(x)$ and $G(y)$ be contained in the class $O$. If
+
+\[
+
+\]
+
+then
+
+\[
+
+\]
+
+If
+
+\[
+
+\]
+
+then
+
+\[
+
+\].
+
+\end{lemma}
+
+\begin{proof}
+
+First inequality.
 
 \end{proof}
 

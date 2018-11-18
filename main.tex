@@ -16,6 +16,7 @@
 \newtheorem{proposition}{Proposition}
 \newtheorem{observation}{Observation}
 \newtheorem{notation}{Notation}
+\newtheorem{remark}{Remark}
 
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 
@@ -683,7 +684,7 @@ R(y) = R(y_{1, 1}, \dots, y_{i, j-1}) - 2K_{i, j} \gamma_{i, j}
 where
 
 \begin{equation}
-\gamma_{i, j} = h_{i,j} + \gamma_{i, j+1}.
+\gamma_{i, j} = h_{i,j} + \gamma_{i, j+1}. \label{eqn:six-two}
 \end{equation}
 
 This result justifies the assumption~\eqref{eqn:six-second-b}, provided that
@@ -834,34 +835,279 @@ and $h_{i+1, 1}$ are always related by the equations stated in the lemma.
 Let $F(x)$ and $G(y)$ be contained in the class $O$. If
 
 \[
-
+\int \Psi(x, y) dF(x) = v_1 \qquad \textup{for all } y \in S_G, y_m \neq 1,
 \]
 
 then
 
 \[
-
+\int \Psi(x, y) dF(x) \geq v_1 \qquad \textup{for all } y \in Y.
 \]
 
 If
 
 \[
-
+\int \Psi(x, y) dG(y) = v_2 \qquad \textup{for all } x \in S_F, x_n \neq 1,
 \]
 
 then
 
 \[
-
+\int \Psi(x, y) dG(x) \geq v_2 \qquad \textup{for all } x \in X
 \].
 
 \end{lemma}
 
 \begin{proof}
 
-First inequality.
+\textbf{First inequality.} The definition of $\Psi(x, y)$ implies that
+
+\[
+\Psi(x, y) \geq \Psi(x, \overline{y-0}), \qquad \textup{for all } x, y.
+\]
+
+Therefore, it is sufficient to consider only those vectors $y$ with $y_m \neq
+1$. The inequality is proved by induction, and we may assume that it has been
+established for all the vectors $y$ whose last $m-q$ components coincide with
+the last $m-q$ components of some vector in the support of $G(y)$.
+
+Let $y = (y_1, \dots, y_{q+1}, y^*_{q+2}, \dots, y^*_m)$ be a vector whose last
+$m - (q+1)$ components coincide with the last $m - (q+1)$ components of some
+vector in the support of $G$. The assumptions of this lemma imply that $R(y)$
+must satisfy all the equations derived in the proof of
+Lemma~\ref{lemma:coefficient-equations}. In particular, $R(y)$ must be
+independent of all the starred components, and (by \ref{eqn:six-one-b}),
+
+\[
+R(y) = R(y_1, \dots, y_q, y_{q+1})
+ - 2 \prod_{s=1}^{i-1}(1-D_s)
+\prod_{t=1}^{q+1} [1 - Q(y_t)] \gamma_{i, j+1},
+\]
+
+where $b_{i, j+1} \leq y^*_{q+2} \leq b_{i, j+2}$. Consider four cases.
+
+\textbf{Case 1:} $y_{q+1} > b_{i, j+1}$. In this case we must have $b_{i, j+1}
+< y_{q+1} \leq b_{i, j+2}$. Then, by Lemma~\ref{lemma:marginal-r-formula},
+
+\begin{align*}
+R(y)
+&= R(y_1, \dots, y_q) - 2 \prod_{s=1}^{i-1}(1-D_s)
+\prod_{t=1}^{q+1} [1 - Q(y_t)] \gamma_{i, j+1} \\
+&- \prod_{s=1}^{i-1}(1-D_s) \prod_{t=1}^{q} [1 - Q(y_t)] \cdot  \\
+& \cdot Q(y_{q+1}) \left [
+    2 \int_{y_{q+1}}^{a_{i+1}} P(t) dF_i(t) + (1-D_i)(1+\phi(D^i))
+\right ].
+\end{align*}
+
+Furthermore, by condition~\ref{eqn:six-one-a} from
+Lemma~\ref{lemma:coefficient-equations}, if $b_{i, j+1} < y < b_{i, j+2}$,
+
+\[
+2h_{i, j+1} = Q(y) \left [
+  2 \int_{y}^{a_{i+1}} P(t) dF_i(t) + (1-D_i)(1+\phi(D^i)) - 2 \gamma_{i, j+2}
+\right ].
+\]
+
+Hence,
+
+\begin{align*}
+R(y)
+&= R(y_1, \dots, y_q) - 2 \prod_{s=1}^{i-1}(1-D_s)
+\prod_{t=1}^{q+1} [1 - Q(y_t)] \gamma_{i, j+1} \\
+&- \prod_{s=1}^{i-1}(1-D_s) \prod_{t=1}^{q} [1 - Q(y_t)] \cdot  \\
+& \cdot \left [
+2h_{i, j+1} + 2(\gamma_{i, j+2} - \gamma_{i, j+1})Q(y_{q+1})
+\right ].
+\end{align*}
+
+By equation~\ref{eqn:six-two}, $\gamma_{i, j+1} - \gamma_{i, j+1} = -h_{i,
+j+1}$; clearly, $R(y)$ is a monotone increasing function of $y_{q+1}$. If the
+components $y_p, y_{p+1}, \dots, y_q$ also lie in the interval $[b_{i, j+1},
+b_{i, j+2}]$, the same argument will show that $R(y)$ is a monotone increasing
+function of these components, and $R(y)$ achieves a smaller value if all of
+these components are replaced by $b_{i, j+1}$; we can write $y_{q+1}^* = b_{i,
+j+1} \in [b_{i, j}, b_{i, j+1}]$. Then $y_{q+1}^*$ coincides with the
+$(q+1)$-th component of some vector in the support of $G(y)$ and
+
+\[
+\begin{aligned}
+R(y) \geq R(&y_1, \dots, y_{p-1}, b_{i, j+1}, \dots, b_{i, j+1}, \\
+&y^*_{q+1}, y^*_{q+2}, \dots, y^*_{m}) \geq v.
+\end{aligned}
+\]
+
+\textbf{Case 2:} $b_{i, j} \leq y_{q+1} \leq b_{i, j+1}$. In this case we
+simply choose $y^*_{q+1} = y_{q+1}$.
+
+\textbf{Case 3:} $a_1 \leq y_{q+1} < b_{i,j}$. For definiteness, assume that
+$b_{k, l} \leq y_{q+1} < b_{k, l+1}$. Applying
+Lemma~\ref{lemma:marginal-r-formula} to $R(y)$ and simplifying the result by
+means of the appropriate condition~\ref{eqn:six-one-a} from
+Lemma~\ref{lemma:coefficient-equations},
+
+\[
+\begin{aligned}
+R(y) &= R(y_1, \dots, y_q) - \prod_{s=1}^{i-1} (1-D_s) \prod_{t=1}^q (1-Q(y_t))
+\gamma_{i, j+1} \\
+&- \prod_{s=1}^{k-1} (1-D_s) \prod_{t=1}^q (1-Q(y_t)) \\
+& \cdot \left [ 2h_{k,l} + 2Q(y_{q+1}) \left ( \gamma_{k, l+1} -
+\prod_{\sigma=k}^{i-1} (1-D_{\sigma}) \gamma_{i, j+1} \right ) \right ].
+\end{aligned}
+\]
+
+The definition of the constant $\gamma_{k, l+1}$ (equations~\ref{eqn:six-two}
+and~\ref{eqn:six-three}) shows that $R(y)$ is a monotone dereasing function of
+$y_{q+1}$. In this case we may take $y^*_{q+1} = b_{i, j} \in [b_{i,j}, b_{i,
+j+1}]$.
+
+\textbf{Case 4:} $y_{q+1} < a_1$. By Lemma~\ref{lemma:psi-monotone-increasing},
+if $x \in S_F$, $\Psi(x, y)$ is a monotone decreasing function of $y_{q+1}$.
+Then $R(y)$ has the same property, and
+
+\[
+R(y) \geq R(y_1, \dots, y_q, a_1, y^*_{q+2}, \dots, y^*_m).
+\]
+
+The problem is now reduced to Case 3.
+
+\textbf{Second inequality.} It is sufficient to interchange the roles of $X$
+and $Y$ and to recall that $\Psi(y, x) = -\Psi(x, y)$. Then, by assumption
+
+\[
+\int \Psi(x, y) dG(y) = v \qquad \textup{for all } x \in S_F, x_n \neq 1.
+\]
+
+Then, by the first inequality (applied to $\Psi(y, x)$)
+
+\[
+\int \Psi(y, x) dG(y) \geq -v.
+\]
 
 \end{proof}
+
+\begin{corollary}
+
+If $y$ is not contained in the support of $G(y)$, then
+
+\[
+\int \Psi(x, y) dF(x) \geq v.
+\]
+
+\end{corollary}
+
+\begin{proof}
+
+This result follows from the strict monotonicity of the functions that appear
+in the proof of Lemma~\ref{lemma:value-of-the-game}.
+
+\end{proof}
+
+\begin{lemma} \label{lemma:optimality-of-corresponding-strategies}
+
+Let $F(x)$ and $G(y)$ be two corresponding strategies such that at least one of
+them is continuous at $1$. Then $v_1 = v_2$ and $F$ and $G$ are optimal.
+
+\end{lemma}
+
+\begin{proof}
+
+For definiteness, we may assume that $G$ is continuous. By definition of $v_1$,
+
+\[
+\int \Psi(x, y) dF(x) = v_1 \qquad \textup{for all } y \in S_G, y_m \neq 1.
+\]
+
+Since the vectors with $y_m = 1$ have $G$-measure zero,
+
+\begin{equation}
+\iint \Psi(x, y) dF(x) dG(y) = \int v_1 dG(y) = v_1.  \label{eqn:optimality-4}
+\end{equation}
+
+Similarly, by definition of $v_2$,
+
+\[
+\int \Psi(x, y) dG(y) = v_2 \qquad \textup{for all } x \in S_F, x_n \neq 1.
+\]
+
+Since $G$ is continuous, the integral is continuous and the equation is valid
+for all $x \in S_F$. Therefore,
+
+\begin{equation}
+\iint \Psi(x, y) dF(x) dG(y) = \int v_2 dF(x) = v_2.  \label{eqn:optimality-5}
+\end{equation}
+
+Equations~\ref{eqn:optimality-4} and~\ref{eqn:optimality-5} imply that $v_1 =
+v_2$; this number is denoted by $v$. Lemma~\ref{lemma:value-of-the-game}
+asserts that $v$ is the value of the game, and that $F$ and $G$ are optimal
+strategies.
+
+\end{proof}
+
+\begin{remark}
+
+It is well known that if $F$ and $G$ are optimal, then
+
+\[
+\int \Psi(x, y) dF(x) = v \qquad \textup{ for all } y \in S_G,
+\]
+
+provided that $y$ is a point of continuity of the integral; a similar result is
+valid when $F$ and $G$ are interchanged. In particular, any pair of optimal
+strategies that belong to the class $O$ must be a pair of corresponding
+strategies, and it is easy to show that one of them must be continuous at
+$t=1$. This remark may be taken as the converse of
+Lemma~\ref{lemma:optimality-of-corresponding-strategies}.
+
+\end{remark}
+
+\section{Characterization of corresponding strategies}
+
+Let $F(x)$ and $G(y)$ be two strategies contained in the class $O$, and let
+$\alpha$ and $\beta$ denote the discrete masses that $F_n$ and $G_m$ may have
+at $x_n = 1, y_m=1$. Let
+
+\[
+\begin{aligned}
+D_i = \int_{a_i}^{a_{i+1}} P(t) dF_i(t) \\
+E_j = \int_{b_j}^{b_{j+1}} Q(t) dG_j(t),
+\end{aligned}
+\]
+
+and let $f^*(x)$ and $g^*(y)$ be two discontinuous functions defined by
+
+\begin{align}
+
+f^*(x) &= \prod_{b_j > x} (1-Q(b_j)) \frac{Q'(x)}{Q^2(x) P(x)} \\
+g^*(y) &= \prod_{a_i > y} (1-P(a_i)) \frac{P'(x)}{P^2(x) Q(x)}
+
+\end{align}
+
+The results of Lemma~\ref{lemma:coefficient-equations} can be stated as
+follows: $F(x)$ and $G(y)$ form a pair of corresponding strategies if and only
+if the following conditions hold:
+
+\begin{align}
+
+dF_i(x_i) &= h_i f^*(x_i) dx_i, \qquad a_i < x_i < a_{i+1} \qquad i=1, \dots, n \\
+dG_j(y_j) &= k_j g^*(y_j) dy_j, \qquad b_j < y_j < b_{j+1} \qquad j=1, \dots, m \\
+1 + 2 \alpha &= D_n + 2h_n \\
+1 + 2 \beta &= E_n + 2k_n \\
+h_i &= (1-D_i) h_{i+1} \\
+k_j &= (1-E_j) k_{j+1} \\
+a_1 &= b_1
+
+\end{align}
+
+If these equations are used to characterize the optimal strategies, it is
+necessary to include the continuity hypothesis ($\alpha \beta = 0$) of
+Lemma~\ref{lemma:optimality-of-corresponding-strategies} and the normalizing
+equations
+
+\[
+\int dF_i = \int dG_j = 1, \qquad i = 1, \dots, n \qquad j = 1, \dots, m.
+\]
+
+\section{Existence of a solution}
 
 \bibliographystyle{plain}
 \bibliography{main}

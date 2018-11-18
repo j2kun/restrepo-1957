@@ -853,8 +853,8 @@ If
 then
 
 \[
-\int \Psi(x, y) dG(x) \geq v_2 \qquad \textup{for all } x \in X
-\].
+\int \Psi(x, y) dG(x) \geq v_2 \qquad \textup{for all } x \in X.
+\]
 
 \end{lemma}
 
@@ -1076,10 +1076,9 @@ E_j = \int_{b_j}^{b_{j+1}} Q(t) dG_j(t),
 and let $f^*(x)$ and $g^*(y)$ be two discontinuous functions defined by
 
 \begin{align}
-
-f^*(x) &= \prod_{b_j > x} (1-Q(b_j)) \frac{Q'(x)}{Q^2(x) P(x)} \\
-g^*(y) &= \prod_{a_i > y} (1-P(a_i)) \frac{P'(x)}{P^2(x) Q(x)}
-
+f^*(x) &= \prod_{b_j > x} (1-Q(b_j)) \frac{Q'(x)}{Q^2(x) P(x)}
+\label{eqn:characterization-6} \\
+g^*(y) &= \prod_{a_i > y} (1-P(a_i)) \frac{P'(x)}{P^2(x) Q(x)} \label{eqn:characterization-7}
 \end{align}
 
 The results of Lemma~\ref{lemma:coefficient-equations} can be stated as
@@ -1087,15 +1086,13 @@ follows: $F(x)$ and $G(y)$ form a pair of corresponding strategies if and only
 if the following conditions hold:
 
 \begin{align}
-
-dF_i(x_i) &= h_i f^*(x_i) dx_i, \qquad a_i < x_i < a_{i+1} \qquad i=1, \dots, n \\
-dG_j(y_j) &= k_j g^*(y_j) dy_j, \qquad b_j < y_j < b_{j+1} \qquad j=1, \dots, m \\
-1 + 2 \alpha &= D_n + 2h_n \\
-1 + 2 \beta &= E_n + 2k_n \\
-h_i &= (1-D_i) h_{i+1} \\
-k_j &= (1-E_j) k_{j+1} \\
+dF_i(x_i) &= h_i f^*(x_i) dx_i, \qquad a_i < x_i < a_{i+1} \qquad i=1, \dots, n \label{eqn:characterization-8} \\
+dG_j(y_j) &= k_j g^*(y_j) dy_j, \qquad b_j < y_j < b_{j+1} \qquad j=1, \dots, m \label{eqn:characterization-9} \\
+1 + 2 \alpha &= D_n + 2h_n \label{eqn:characterization-10} \\
+1 + 2 \beta &= E_n + 2k_n \label{eqn:characterization-11} \\
+h_i &= (1-D_i) h_{i+1} \label{eqn:characterization-12} \\
+k_j &= (1-E_j) k_{j+1} \label{eqn:characterization-13} \\
 a_1 &= b_1
-
 \end{align}
 
 If these equations are used to characterize the optimal strategies, it is
@@ -1108,6 +1105,139 @@ equations
 \]
 
 \section{Existence of a solution}
+
+We have shown that in order to find two optimal strategies it is sufficient to
+find a set of numbers $a_1, \dots, b_m, h_1, \dots, k_m$, $\alpha$, and
+$\beta$ that satisfy the previous set of equations. In
+equations~\ref{eqn:characterization-10}, \ref{eqn:characterization-11},
+\ref{eqn:characterization-12}, and~\ref{eqn:characterization-13} it is
+convenient to write $D_i$ and $E_j$ in terms of $f^*$ and $g^*$, and to
+eliminate $h_n, k_m, h_i, k_j$ yb means of the normalizing equations. In this
+form, the complete system is as follows:
+
+\mathbf{Normalizing Equations}
+
+\begin{align}
+h_n \int_{a_n}^1 f^*(t) dt + \alpha &= 1 \label{eqn:existence-14} \\
+k_m \int_{b_n}^1 g^*(t) dt + \beta &= 1 \label{eqn:existence-15} \\
+h_i \int_{a_i}^{a_{i+1}} f^*(t) dt &= 1, \qquad i=1, \dots, n-1 \label{eqn:existence-16} \\
+k_j \int_{b_j}^{b_{j+1}} g^*(t) dt &= 1, \qquad j=1, \dots, m-1 \label{eqn:existence-17}
+\end{align}
+
+\mathbf{Equations from Lemma~\ref{lemma:coefficient-equations} and
+Lemma~\ref{lemma:optimality-of-corresponding-strategies}}
+
+\begin{align}
+\int_{a_n}^1 \left [ (1+\alpha) - (1-\alpha)P(t) \right ] f^*(t) dt &= 2(1-\alpha) \label{eqn:existence-18} \\
+\int_{b_m}^1 \left [ (1+\beta) - (1-\beta)Q(t) \right ] g^*(t) dt &= 2(1-\beta) \label{eqn:existence-19} \\
+\int_{a_{i}}^{a_{i+1}} (1-P(t))f^*(t) dt &= \frac{1}{h_{i+1}} \qquad i = 1,
+\dots, n-1 \label{eqn:existence-20} \\
+\int_{b_{j}}^{b_{j+1}} (1-Q(t))g^*(t) dt &= \frac{1}{k_{j+1}} \qquad j=1,
+\dots, m-1 \label{eqn:existence-21} \\
+a_1 = b_1 \label{eqn:existence-22} \\
+\alpha \beta = 0. \label{eqn:existence-23}
+\end{align}
+
+\begin{lemma} \label{lemma:infinite-limit}
+
+Let $a$ be any number in the interval $(0, 1]$, and let $b_1, \dots, b_m$ be
+any set of parameters, subject to the restriction $0 < b_1 < \cdots < b_m < 1$;
+let $f^*$ be defined by equation~\ref{eqn:characterization-6}. Then
+
+\[
+\lim_{x \to 0} \int_{x}^a (1-P(t)) f^*(t) dt = \pm \infty.
+\]
+
+\end{lemma}
+
+\begin{proof}
+
+Let
+
+\[
+M = \prod_{j=1}^m (1 - Q(b_j)),
+\]
+
+and choose $c$ such that for $t \leq c$, $1 - P(t) \geq P(t)$. Then, for $x
+\leq c$,
+
+\[
+\begin{aligned}
+\int_{x}^a (1 - P(t)) f^*(t) dt &\geq \int_{x}^c M\frac{Q'(t)}{Q^2(t)} dt
++ \int_{c}^a (1-P(t)) f^*(t) dt \\
+&= M \left [ \frac{1}{Q(x)} - \frac{1}{Q(c)} \right ]
++ \int_{c}^a (1-P(t)) f^*(t) dt.
+\end{aligned}
+\]
+
+The first term tends to $+ \infty$; the second one is finite.
+
+\end{proof}
+
+\begin{lemma} \label{lemma:unique-inc-dec}
+
+Let $\alpha$ be any number in the interval $[0,1)$, and let $b_1, \dots, b_m$
+be any set of parameters, subject to the restriction $0 < b_1 < \cdots < b_m <
+1$. Under these assumptions, equations~\ref{eqn:existence-14},
+\ref{eqn:existence-16}, \ref{eqn:existence-18}, and~\ref{eqn:existence-20} have
+a unique solution $a_1, \dots, a_n, h_1, \dots, h_n$. If the $b$'s are fixed,
+$a_n$ is a monotone increasing function of $\alpha$, and $a_n \to 1$ as $\alpha
+\to 1$. If $\alpha$ is fixed, $a_n$ is a decreasing function of $b_m$, and $a_n
+\to 0$ as $b_m \to 1$.
+
+\end{lemma}
+
+\begin{proof}
+
+Lemma~\ref{lemma:infinite-limit} shows that equation~\ref{eqn:existence-18} has
+a solution $a_n \in (0, 1]$; since the integrand is positive, the solution is
+unique, and it is clearly a continuous, monotone increasing function of
+$\alpha$; setting $\alpha = 1$, one obtains $a_n = 1$; but if $\alpha < 1$,
+$a_n$ must be in $(0, 1)$, and $h_n$ can be computed by means of
+equation~\ref{eqn:existence-14}. When $a_n$ and $h_n$ are known, $a_{n-1}$ can
+be obtained from equation~\ref{eqn:existence-20}, and $h_{n-1}$ from
+equation~\ref{eqn:existence-16}. The process can be continued until all the
+$a$'s and the $h$
+s are found. Finally, it is necessary to consider $a_n$ as a function of $b_m$.
+Let $\alpha$ and $d$ be fixed, and consider
+
+\[
+\int_{d}^{b_m} [(1 + \alpha) - (1 - \alpha) P(t)] f^*(t) dt \\
++ \int_{b_m}^{1} [(1 + \alpha) - (1 - \alpha) P(t)] f^*(t) dt.
+\]
+
+In the first term, the integrand contains the factor $(1 - Q(b_m))$ and tends
+to zero uniformly as $b_m \to 1$; in the second term the integrand is bounded,
+and the range of integration can be made arbitrarily small. Thus, as $b_m \to
+1$, the solution $a_n$ of equation~\ref{eqn:existence-18} must approach $0$.
+
+\end{proof}
+
+\begin{remark}
+
+The value of each $a_i$ depends only on those parameters $b_j$ that are larger
+than $a_i$. The remaining parameters can be changed, and new parameters may be
+added. Also, the process is symmetric: if $a_1, \dots, a_n, \beta$ are given
+parameters, equations~\ref{eqn:existence-15}, \ref{eqn:existence-17},
+\ref{eqn:existence-19}, and~\ref{eqn:existence-21} have unique solutions $b_1,
+\dots, b_m$. Results like those of Lemma~\ref{lemma:unique-inc-dec} will hold.
+
+\end{remark}
+
+\begin{theorem}
+
+The system of equations~\ref{eqn:existence-14}--\ref{eqn:existence-23} has a
+unique solution. This solution determines two strategies $F(x)$ and $G(y)$ that
+are optimal, and these are the only optimal strategies that belong to the class
+$O$.
+
+\end{theorem}
+
+\begin{proof}
+
+
+
+\end{proof}
 
 \bibliographystyle{plain}
 \bibliography{main}

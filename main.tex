@@ -91,7 +91,7 @@ adapted for the solution of our problems.
 
 Each game is characterized by two numbers $m$ and $n$ that denote the total
 number of attempts that each player can make. The solutions are characterized
-by two sets of numbers $a_1, \dots, a_n$ and $b_1, \dots, b_,$ that depend only
+by two sets of numbers $a_1, \dots, a_n$ and $b_1, \dots, b_m$ that depend only
 on $P, Q, m,$ and $n$. In every optimal strategy, the $i$-th action of Player
 1 and the $j$-th action of Player 2 must be carried out during the intervals
 $[a_i, a_{i+1}], [b_j, b_{j+1}]$; in every game, $a_1 = b_1,$ and $a_{n+1} =
@@ -103,12 +103,12 @@ strategy, Player 1 will make his $i$-th attempt at time $x_i$, chosen at random
 by means of a probability distribution $F_i(x_i)$; $F_n(x_n)$ may have a
 discrete mass $\alpha$ at $x_n = 1$; away from $1$, each $F_i$ is absolutely
 continuous and has a piecewise continuous density. The discontinuities of the
-densities occur at the points $b_1, \dots b_m$; precisely,
+densities occur at the points $b_1, \dots, b_m$; precisely,
 
 \[
 dF_i(x_i) = \begin{cases}
-h_i f^*(x_i) dx_i & \textup{ if } a_i < x_i < a_{i+1}, \\
-0                 & \textup{ if } x_i \not \in [a_i, a_{i+1}], \\
+h_i f^*(x_i) dx_i & \textup{ if } a_i < x_i < a_{i+1} \\
+0                 & \textup{ if } x_i \not \in [a_i, a_{i+1}] \\
 \end{cases}
 \]
 
@@ -140,7 +140,7 @@ players have the same optimal strategies; $\alpha = 0$, and $a_k = b_k, k=1,
 
 \[
 \begin{aligned}
-P(a_n-k) &= \frac{1}{2k-3} & k = 0, 1, \dots, n-1, \\
+P(a_{n-k}) &= \frac{1}{2k+3} & k = 0, 1, \dots, n-1, \\
 dF_{n-k}(t) &= \frac{1}{4(k+1)} \frac{P'(t)}{P^3(t)} dt & a_{n-k} < t <
 a_{n-k+1}.
 \end{aligned}

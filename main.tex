@@ -1235,7 +1235,75 @@ $O$.
 
 \begin{proof}
 
+It is sufficient to show that the system has a unique solution $a_1, \dots,
+a_n$, $b_1, \dots, b_m$, $h_1, \dots, h_n$, $k_1, \dots, k_m$, $\alpha$,
+$\beta$. Then $F(x)$ and $G(y)$ can be defined by
+equations~\ref{eqn:characterization-8} and~\ref{eqn:characterization-9}. The
+normalizing equations show that $F$ and $G$ are strategies, and the remaining
+equations show that $F$ and $G$ satisfy the hypotheses of
+Lemma~\ref{lemma:optimality-of-corresponding-strategies}. The remark that
+follows that lemma shows that no other strategies in the class $O$ can be
+optimal.
 
+\textbf{Existence}. Consider two numbers $\alpha$ and $\beta$ such that
+
+\[
+0 \leq \alpha < 1, \qquad \alpha \beta = 0, \qquad 0 \leq \beta < 1,
+\]
+
+and construct a set of numbers $a_1^*, \dots, a_n^*, b_1^*, \dots, b_n^*$ as
+follows: first, compute two numbers $a_n$ and $b_m$ by means of
+equations~\ref{eqn:existence-18} and~\ref{eqn:existence-19} using no parameters
+in the definitions of $f^*$ and $g^*$; the resulting numbers are compared and
+the larger one is kept as a parameter; for definiteness, we assume that $a_n >
+b_m$, and define $a_n^* = a_n$; the smaller number is neglected. In the next
+step a number $a_{n-1}$ is computed by means of equation~\ref{eqn:existence-20}
+(without parameters), and a new $b_m$ is computed from
+equation~\ref{eqn:existence-19}, using the single parameter $a_n^*$. It is
+clear that the new $b_m$ is smaller than the one computed in the previous step,
+and therefore $b_m < a_n^*$; the two numbers $a_{n-1}$ and $b_m$ are compared,
+and the larger one is kept as a parameter. For definiteness, one may assume
+that $a_{n-1} > b_m$, and define $a_{n-1}^* = a_{n-1}$. The process is
+continued in this manner: at each step, a new $a_i$ and a new $b_j$ are
+computed, using as parameters the previously starred $a$'s and $b$'s; the two
+numbers are compared, and the larger one is kept as a parameter, denoted by
+$a_i^*$ (or $b_j^*$); the corresponding $h_i^*$ (or $k_j^*$) is computed by
+means of the appropriate normalizing equation. Since each parameter is smaller
+than those computed previously, it is clear that the resulting set is
+self-consistent: that is, if $b_1^*, \dots, b_m^*$ are used as parameters, one
+obtains again $a_1^*, \dots, a_n^*$, and conversely. Therefore, these numbers
+satisfy the system of equations, \emph{except for
+equation}~\ref{eqn:existence-22}.
+
+Now, consider $a_1^*$ and $b_1^*$ as functions of $\alpha$ and $\beta$. If the
+previous construction is carried out with $\alpha = \beta = 0$, it may happen
+that $a_1^* = b_1^*$, and all equations are satisfied; otherwise, either $a_1^*
+< b_1^*$ or $b_1^* < a_1^*$; for definiteness \emph{it may be assumed that}
+$b_1^* < a_1^*$. In this case, the same construction is applied with $\alpha=0,
+\beta=1-\varepsilon$, and $\varepsilon$ is chosen so small that in the first
+step $a_n < b_m$, and $b_m^* = b_m$ is arbitrarily close to 1. In the remaining
+steps $a_n$ is always computed with the parameter $b_m$, and $a_n \to 0$; thus
+all the $b^*$'s are computed without parameters and remain bounded away from
+zero; then $a_1^* < a_n^* < b_1^*$; the inequality has been reversed as $\beta$
+increased from $0$ to $1$. Since the $a$'s and $b$'s are limits of integration
+of strictly positive densities, it is clear that $a_1^*$ and $b_1^*$ are
+continuous functions of $\beta$, and there exists a positive $\beta$ for which
+$a_1^* = b_1^*$. If the construction with $\alpha = \beta = 0$ leads to the
+inequality $a_1^* < b_1^*$, the system of equations has a solution with $\alpha
+> 0, \beta = 0$.
+
+\textbf{Uniqueness}. The solution is unique. Indeed, suppose that $a_1, \dots,
+a_n$, $b_1, \dots, b_m$ and $a_1^*, \dots, a_n^*$, $b_1^*, \dots, b_m^*$ are
+two solutions. These solutions give rise to two pairs of optimal strategies
+$F(x), G(y)$ and $F^*(x), G^*(y)$. Since $G$ and $G^*$ are optimal
+
+\[
+\int \Psi(x, y) dF(x) = v, \qquad \textup{ for all } y \in S_{G^*}, y_m \neq 1.
+\]
+
+The corollary to Lemma~\ref{lemma:value-of-the-game} shows that $S_{G^*}
+\subset S_G$. Since the argument is symmetric, the two measures must have the
+same supports, i.e., $b_j^* = b_j$, for all $j$. Similarly, $a_i^* = a_i$.
 
 \end{proof}
 

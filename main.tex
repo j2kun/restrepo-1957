@@ -727,7 +727,7 @@ R(y) = R(y_{1,1}, \dots, y_{i, r_i - 1}) - 2K_{i, r_i} \gamma_{i, r_i}
 with
 
 \begin{equation}
-\gamma_{i, r_i} = h_{i, r_i} + \prod{t=i}^{i+k-1} (1-D_t) \gama_{i+k, 1}.
+\gamma_{i, r_i} = h_{i, r_i} + \prod{t=i}^{i+k-1} (1-D_t) \gamma_{i+k, 1}.
 \label{eqn:six-three}
 \end{equation}
 
@@ -1059,7 +1059,7 @@ Lemma~\ref{lemma:optimality-of-corresponding-strategies}.
 
 \end{remark}
 
-\section{Characterization of corresponding strategies}
+\subsection{Characterization of corresponding strategies}
 
 Let $F(x)$ and $G(y)$ be two strategies contained in the class $O$, and let
 $\alpha$ and $\beta$ denote the discrete masses that $F_n$ and $G_m$ may have
@@ -1114,7 +1114,7 @@ convenient to write $D_i$ and $E_j$ in terms of $f^*$ and $g^*$, and to
 eliminate $h_n, k_m, h_i, k_j$ by means of the normalizing equations. In this
 form, the complete system is as follows:
 
-\mathbf{Normalizing Equations}
+\textbf{Normalizing Equations}
 
 \begin{align}
 h_n \int_{a_n}^1 f^*(t) dt + \alpha &= 1 \label{eqn:existence-14} \\
@@ -1123,7 +1123,7 @@ h_i \int_{a_i}^{a_{i+1}} f^*(t) dt &= 1, \qquad i=1, \dots, n-1 \label{eqn:exist
 k_j \int_{b_j}^{b_{j+1}} g^*(t) dt &= 1, \qquad j=1, \dots, m-1 \label{eqn:existence-17}
 \end{align}
 
-\mathbf{Equations from Lemma~\ref{lemma:coefficient-equations} and
+\textbf{Equations from Lemma~\ref{lemma:coefficient-equations} and
 Lemma~\ref{lemma:optimality-of-corresponding-strategies}}
 
 \begin{align}

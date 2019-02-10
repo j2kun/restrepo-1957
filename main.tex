@@ -208,10 +208,9 @@ follows:
 [\emph{Editor's note:} The formulas above literally encode the logical formula
 ``The player who acts at time $z_1$ succeeds at $z_1$ OR (That player acts but
 misses at $z_1$ AND the next player to act succeeds at time $z_2$
-OR($\dots$)).'' The alternating between $r$ and $s$ is to ensure that all
-successful actions pay (expected) utility to Player 1. If Player 2 wins, it's a
-negative payoff to Player 1. The $s$ is needed to ensure failed actions
-represent probabilities.]
+OR($\dots$)).'' The usage of $r$ makes $\Psi$ encode the expected utility to
+Player 1. If Player 2 wins, it's a negative payoff to Player 1. The $s$ is
+needed to ensure failed actions represent probabilities.]
 
 The number of components in $x$ and $y$ is not essential, and the definition
 can be applied to a single vector $x \in X$, or to a single vector $y \in Y$.
@@ -299,7 +298,7 @@ and
 
 \[
 \Psi(z_t, \dots, z_k) +
-r(_t) + [1-s(z_i)] \Psi(z_{t+1}, \dots, z_k).
+r(z_t) + [1-s(z_t)] \Psi(z_{t+1}, \dots, z_k).
 \]
 
 Therefore,
@@ -326,14 +325,14 @@ not contain any components of $y$. Similarly, for any fixed $x$, $\Psi(x, y)$
 is a monotone decreasing function of each component $y_j$ of $y$ as long as
 $y_j$ ranges over an open interval that does not contain any components of $x$.
 
+\end{lemma}
+
 [\emph{Editor's note:} Restated, fixing Player 2's strategy, in considering the
 action time for action $i$, it is better for Player 1 to wait as long as
 possible before acting, as their probability of success increases over time.
-This is not true if Player 1 waits so long that Player 2 gets to act, because
+This is not true if Player 1 waits so long that Player 2 acts, because
 Player 2 may succeed. But so long as that doesn't happen, Player 1's expected
 utility increases.]
-
-\end{lemma}
 
 \begin{proof}
 
@@ -413,7 +412,7 @@ D^k &= (D_{k+1}, D_{k+2}, \dots, D_n) \\
 Using the last definition, it is easy to see that
 
 \[
-\int \Psi(x_{k+1}, \dots, x_n) dF_{k+1}(x_{k+1}) \dots dF_n(s_n)
+\int \Psi(x_{k+1}, \dots, x_n) dF_{k+1}(x_{k+1}) \dots dF_n(x_n)
 = \phi(D^k).
 \]
 

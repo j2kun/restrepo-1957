@@ -11,10 +11,12 @@ from sympy.functions.elementary.miscellaneous import Max
 
 
 class P(Function):
-    '''A generic function representing the probability of success when taking an action at the input time.
+    '''A generic function representing the probability of success when taking
+    an action at the input time.
 
-    This function assumes that P(0) = 0 and P(1) = 1. Implicitly, we assume P is increasing, but
-    I don't know how to represent that in sympy in a way that is useful at all.
+    This function assumes that P(0) = 0 and P(1) = 1. Implicitly, we assume P
+    is increasing, but I don't know how to represent that in sympy in a way
+    that is useful at all.
     '''
     nargs = (1,)
 
@@ -30,8 +32,8 @@ class P(Function):
 def f_star(prob_fun, prob_fun_var, larger_transition_times):
     '''Compute f^* as in Restrepo '57.
 
-    In this implementation, we're working in the simplified example where P = Q (both players
-    probabilities of success are the same).
+    In this implementation, we're working in the simplified example
+    where P = Q (both players probabilities of success are the same).
     '''
     x = prob_fun_var
     P = prob_fun
@@ -48,7 +50,8 @@ def compute_a_n(prob_fun, alpha=0):
     t = Symbol('t0', positive=True)
     a_n = Symbol('a_n', positive=True)
 
-    a_n_integral = Integral(((1 + alpha) - (1 - alpha) * P(t)) * f_star(P, t, []), (t, a_n, 1))
+    a_n_integral = Integral(
+        ((1 + alpha) - (1 - alpha) * P(t)) * f_star(P, t, []), (t, a_n, 1))
     a_n_integrated = a_n_integral.doit()
     P_a_n_solutions = solve(a_n_integrated - 2 * (1 - alpha), P(a_n))
     P_a_n = Max(*P_a_n_solutions)
@@ -73,7 +76,7 @@ def compute_as_and_bs(prob_fun, n, alpha=0):
     P = prob_fun
     t = Symbol('t0', positive=True)
 
-    a_n, h_n  = compute_a_n(prob_fun, alpha=alpha)
+    a_n, h_n = compute_a_n(prob_fun, alpha=alpha)
 
     normalizing_constants = deque([h_n])
     transitions = deque([a_n])
@@ -84,7 +87,8 @@ def compute_as_and_bs(prob_fun, n, alpha=0):
         last_h = normalizing_constants[0]
         next_a = Symbol('a', positive=True)
 
-        next_a_integral = Integral((1 - P(t)) * f_star(P, t, transitions), (t, next_a, last_a))
+        next_a_integral = Integral(
+            (1 - P(t)) * f_star(P, t, transitions), (t, next_a, last_a))
         next_a_integrated = next_a_integral.doit()
         # print("%s" % next_a_integrated)
         P_next_a_solutions = solve(next_a_integrated - 1 / last_h, P(next_a))
@@ -92,13 +96,15 @@ def compute_as_and_bs(prob_fun, n, alpha=0):
         P_next_a = Max(*P_next_a_solutions)
 
         next_a_solutions = solve(P(next_a) - P_next_a, next_a)
-        next_a_solutions_in_range = [soln for soln in next_a_solutions if 0 < soln <= 1]
+        next_a_solutions_in_range = [
+            soln for soln in next_a_solutions if 0 < soln <= 1]
         assert len(next_a_solutions_in_range) == 1
         next_a_soln = next_a_solutions_in_range[0]
         print("a_{n-%d} = %s" % (step+1, next_a_soln))
 
-        next_h_integral = Integral(f_star(P, t, transitions), (t, next_a_soln, last_a))
-        next_h  = 1 / next_h_integral.doit()
+        next_h_integral = Integral(
+            f_star(P, t, transitions), (t, next_a_soln, last_a))
+        next_h = 1 / next_h_integral.doit()
         print("h_{n-%d} = %s" % (step+1, next_h))
 
         transitions.appendleft(next_a_soln)

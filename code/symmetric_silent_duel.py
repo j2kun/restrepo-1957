@@ -2,31 +2,11 @@ from collections import deque
 
 from sympy import Integral
 from sympy import Lambda
-from sympy import Function
 from sympy import S
 from sympy import Symbol
 from sympy import diff
 from sympy.solvers import solve
 from sympy.functions.elementary.miscellaneous import Max
-
-
-class P(Function):
-    '''A generic function representing the probability of success when taking
-    an action at the input time.
-
-    This function assumes that P(0) = 0 and P(1) = 1. Implicitly, we assume P
-    is increasing, but I don't know how to represent that in sympy in a way
-    that is useful at all.
-    '''
-    nargs = (1,)
-
-    @classmethod
-    def eval(cls, x):
-        if x.is_Number:
-            if x is S.Zero:
-                return S.Zero
-            elif x is S.One:
-                return S.One
 
 
 def f_star(prob_fun, prob_fun_var, larger_transition_times):

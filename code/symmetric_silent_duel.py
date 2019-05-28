@@ -2,7 +2,6 @@ from collections import deque
 
 from sympy import Integral
 from sympy import Lambda
-from sympy import S
 from sympy import Symbol
 from sympy import diff
 from sympy.solvers import solve
@@ -60,6 +59,7 @@ def compute_as_and_bs(prob_fun, n, alpha=0):
 
     normalizing_constants = deque([h_n])
     transitions = deque([a_n])
+    f_star_products = deque([1, 1 - P(a_n)])
 
     for step in range(n):
         # prepending new a's and h's to the front of the list
@@ -72,7 +72,7 @@ def compute_as_and_bs(prob_fun, n, alpha=0):
         next_a_integrated = next_a_integral.doit()
         # print("%s" % next_a_integrated)
         P_next_a_solutions = solve(next_a_integrated - 1 / last_h, P(next_a))
-        print("P(a_{n-%d}) is one of %s" % (step+1, P_next_a_solutions))
+        print("P(a_{n-%d}) is one of %s" % (step + 1, P_next_a_solutions))
         P_next_a = Max(*P_next_a_solutions)
 
         next_a_solutions = solve(P(next_a) - P_next_a, next_a)
@@ -80,13 +80,16 @@ def compute_as_and_bs(prob_fun, n, alpha=0):
             soln for soln in next_a_solutions if 0 < soln <= 1]
         assert len(next_a_solutions_in_range) == 1
         next_a_soln = next_a_solutions_in_range[0]
-        print("a_{n-%d} = %s" % (step+1, next_a_soln))
+        print("a_{n-%d} = %s" % (step + 1, next_a_soln))
 
         next_h_integral = Integral(
             f_star(P, t, transitions), (t, next_a_soln, last_a))
         next_h = 1 / next_h_integral.doit()
-        print("h_{n-%d} = %s" % (step+1, next_h))
+        print("h_{n-%d} = %s" % (step + 1, next_h))
 
+        print("dF_{n-%d} coeff = %s" % (step + 1, next_h * f_star_products[-1]))
+
+        f_star_products.append(f_star_products[-1] * (1 - P_next_a))
         transitions.appendleft(next_a_soln)
         normalizing_constants.appendleft(next_h)
 

@@ -5,7 +5,6 @@ from typing import NewType
 from sympy import Integral
 from sympy import Lambda
 from sympy import N
-from sympy import S
 from sympy import Symbol
 from sympy import diff
 from sympy.functions.elementary.miscellaneous import Max
@@ -50,8 +49,7 @@ def f_star(
         product *= (1 - P(a))
 
     return (
-        product * diff(Q(variable), variable)
-        / (Q(variable)**2 * P(variable))
+        product * diff(Q(variable), variable) / (Q(variable)**2 * P(variable))
     )
 
 
@@ -111,7 +109,7 @@ def compute_a_n_and_b_m(silent_duel_input, alpha=0, beta=0):
 
 
 def compute_as_and_bs(duel_input, alpha=0, beta=0):
-    '''Compute the a's and b's for the symmetric silent duel.'''
+    '''Compute the a's and b's for the silent duel.'''
     P = prob_fun
     t = Symbol('t0', positive=True)
 
@@ -131,7 +129,7 @@ def compute_as_and_bs(duel_input, alpha=0, beta=0):
         next_a_integrated = next_a_integral.doit()
         # print("%s" % next_a_integrated)
         P_next_a_solutions = solve(next_a_integrated - 1 / last_h, P(next_a))
-        print("P(a_{n-%d}) is one of %s" % (step+1, P_next_a_solutions))
+        print("P(a_{n-%d}) is one of %s" % (step + 1, P_next_a_solutions))
         P_next_a = Max(*P_next_a_solutions)
 
         next_a_solutions = solve(P(next_a) - P_next_a, next_a)
@@ -139,12 +137,12 @@ def compute_as_and_bs(duel_input, alpha=0, beta=0):
             soln for soln in next_a_solutions if 0 < soln <= 1]
         assert len(next_a_solutions_in_range) == 1
         next_a_soln = next_a_solutions_in_range[0]
-        print("a_{n-%d} = %s" % (step+1, next_a_soln))
+        print("a_{n-%d} = %s" % (step + 1, next_a_soln))
 
         next_h_integral = Integral(
             f_star(P, t, transitions), (t, next_a_soln, last_a))
         next_h = 1 / next_h_integral.doit()
-        print("h_{n-%d} = %s" % (step+1, next_h))
+        print("h_{n-%d} = %s" % (step + 1, next_h))
 
         transitions.appendleft(next_a_soln)
         normalizing_constants.appendleft(next_h)
@@ -157,9 +155,9 @@ P = Lambda((x,), x)
 Q = Lambda((x,), x**2)
 duel_input = SilentDuelInput(
     player_1_action_count=3,
-    player_2_action_count=4,
+    player_2_action_count=3,
     player_1_action_success=P,
-    player_2_action_success=Q,
+    player_2_action_success=P,
 )
 compute_a_n_and_b_m(duel_input)
 # compute_as_and_bs(Lambda((x,), x), 10)

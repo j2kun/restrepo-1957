@@ -11,7 +11,6 @@ from sympy import Lambda
 from sympy import N
 from sympy import Symbol
 from sympy import diff
-from sympy.functions.elementary.miscellaneous import Max
 from sympy.solvers import solve
 
 
@@ -283,19 +282,23 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
     intermediate_state = IntermediateState.new()
 
     while p1_index > 0 or p2_index > 0:
-        # compute a new a_i and b_j, keeping the larger as the next parameter
+        # the larger of a_i, b_j is kept as a parameter, then the other will be repeated
+        # in the next iteration; e.g., a_{i-1} and b_j (the latter using a_i in its f*)
         (a_i, b_j, h_i, k_j) = compute_ai_and_bj(duel_input, intermediate_state)
 
-        # the larger of a_n, b_m is kept as a parameter, then the other will be repeated
-        # in the next iteration; e.g., a_{n-1} and b_m (the latter using a_n in its f*)
-        # possibly add both if a_i == b_j
+        # there is one exception, if a_i == b_j, then the computation of f* in the next
+        # iteration (I believe) should not include the previously kept parameter. I.e.,
+        # in the symmetric version, if a_n is kept and the next computation of b_m uses
+        # the previous a_n, then it will produce the wrong value.
+        #
+        # I resolve this by keeping both parameters if a_i == b_j.
         if a_i >= b_j and p1_index > 0:
-            intermediate_state.add_p1(N(a_i), N(h_i))
-            print("a_{} = {}, h_{} = {}".format(p1_index, N(a_i), p1_index, N(h_i)))
+            intermediate_state.add_p1(float(a_i), float(h_i))
+            print("a_{} = {}, h_{} = {}".format(p1_index, float(a_i), p1_index, float(h_i)))
             p1_index -= 1
         if b_j >= a_i and p2_index > 0:
-            intermediate_state.add_p2(N(b_j), N(k_j))
-            print("b_{} = {}, k_{} = {}".format(p2_index, N(b_j), p2_index, N(k_j)))
+            intermediate_state.add_p2(float(b_j), float(k_j))
+            print("b_{} = {}, k_{} = {}".format(p2_index, float(b_j), p2_index, float(k_j)))
             p2_index -= 1
 
     return intermediate_state

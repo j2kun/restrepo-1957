@@ -214,36 +214,42 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     if computing_a_n:
         p1_fstar = f_star(P, Q, t, [])
         p1_integrand = ((1 + alpha) - (1 - alpha) * P(t)) * p1_fstar
-        P_a_i_target = 2 * (1 - alpha)
+        p1_integral_target = 2 * (1 - alpha)
     else:
         p1_fstar_parameters = list(p2_transitions)[:-1]  # ignore b_{m+1} = 1
         p1_fstar = f_star(P, Q, t, p1_fstar_parameters)
         p1_integrand = (1 - P(t)) * p1_fstar
-        P_a_i_target = 1 / intermediate_state.player_1_normalizing_constants[0]
+        p1_integral_target = 1 / intermediate_state.player_1_normalizing_constants[0]
 
     a_i_integral = Integral(p1_integrand, (t, a_i, a_i_plus_one))
     a_i_integrated = a_i_integral.doit()
-    P_a_i = solve_unique_real(a_i_integrated - P_a_i_target, P(a_i))
-    print("P(a_i) = %s" % P_a_i)
-    a_i = solve_unique_real(P(a_i) - P_a_i, a_i, solution_min=0, solution_max=a_i_plus_one)
-    print("a_i = %s" % a_i)
+    a_i = solve_unique_real(
+        a_i_integrated - p1_integral_target,
+        a_i,
+        solution_min=0,
+        solution_max=a_i_plus_one
+    )
+    # print("a_i = %s" % a_i)
 
     # the b_j part
     if computing_b_m:
         p2_fstar = f_star(Q, P, t, [])
         p2_integrand = ((1 + beta) - (1 - beta) * P(t)) * p2_fstar
-        Q_b_j_target = 2 * (1 - beta)
+        p2_integral_target = 2 * (1 - beta)
     else:
         p2_fstar_parameters = list(p1_transitions)[:-1]  # ignore a_{n+1} = 1
         p2_fstar = f_star(Q, P, t, p2_fstar_parameters)
         p2_integrand = (1 - P(t)) * p2_fstar
-        Q_b_j_target = 1 / intermediate_state.player_2_normalizing_constants[0]
+        p2_integral_target = 1 / intermediate_state.player_2_normalizing_constants[0]
 
     b_j_integral = Integral(p2_integrand, (t, b_j, b_j_plus_one))
     b_j_integrated = b_j_integral.doit()
-    Q_b_j = solve_unique_real(b_j_integrated - Q_b_j_target, Q(b_j))
-    # print("Q(b_j) = %s" % Q_b_j)
-    b_j = solve_unique_real(Q(b_j) - Q_b_j, b_j, solution_min=0, solution_max=b_j_plus_one)
+    b_j = solve_unique_real(
+        b_j_integrated - p2_integral_target,
+        b_j,
+        solution_min=0,
+        solution_max=b_j_plus_one
+    )
     # print("b_j = %s" % b_j)
 
     # the h_i part
@@ -276,21 +282,20 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
     p2_index = duel_input.player_2_action_count
     intermediate_state = IntermediateState.new()
 
-    while p1_index > 0 and p2_index > 0:
+    while p1_index > 0 or p2_index > 0:
         # compute a new a_i and b_j, keeping the larger as the next parameter
         (a_i, b_j, h_i, k_j) = compute_ai_and_bj(duel_input, intermediate_state)
 
         # the larger of a_n, b_m is kept as a parameter, then the other will be repeated
         # in the next iteration; e.g., a_{n-1} and b_m (the latter using a_n in its f*)
-
-                                # maybe check for equality first and do both???
-        if a_i > b_j:
-            intermediate_state.add_p1(a_i, h_i)
-            print("a_{} = {}, h_{} = {}".format(p1_index, a_i, p1_index, h_i))
+        # possibly add both if a_i == b_j
+        if a_i >= b_j and p1_index > 0:
+            intermediate_state.add_p1(N(a_i), N(h_i))
+            print("a_{} = {}, h_{} = {}".format(p1_index, N(a_i), p1_index, N(h_i)))
             p1_index -= 1
-        else:
-            intermediate_state.add_p2(b_j, k_j)
-            print("b_{} = {}, k_{} = {}".format(p2_index, b_j, p2_index, k_j))
+        if b_j >= a_i and p2_index > 0:
+            intermediate_state.add_p2(N(b_j), N(k_j))
+            print("b_{} = {}, k_{} = {}".format(p2_index, N(b_j), p2_index, N(k_j)))
             p2_index -= 1
 
     return intermediate_state
@@ -307,5 +312,7 @@ duel_input = SilentDuelInput(
     player_2_action_success=P,
 )
 compute_as_and_bs(duel_input, alpha=0, beta=0)
+
+# next: set up tests for symmetric case, implement binary search for alpha, beta.
 
 f = ActionDistribution(support_start=0, support_end=1, cumulative_density_function=Q)

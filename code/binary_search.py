@@ -46,7 +46,7 @@ def binary_search(test, param_min=0, param_max=1, tolerance=1e-5):
     current_max = param_max
 
     while current_max - current_min > tolerance:
-        tested_value = (max_val + min_val) / 2
+        tested_value = (current_max + current_min) / 2
         hint = test(tested_value)
         if hint.found:
             return BinarySeachResult(found=True, value=tested_value)

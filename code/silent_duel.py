@@ -9,12 +9,17 @@ from sympy import Expr
 from sympy import Integral
 from sympy import Lambda
 from sympy import N
+from sympy import Piecewise
 from sympy import Symbol
 from sympy import diff
 from sympy.solvers import solve
 
+from binary_search import binary_search
+from binary_search import BinarySearchHint
+
 
 SuccessFn = NewType('SuccessFn', Lambda)
+EPSILON = 1e-6
 
 
 def solve_unique_real(expr, var, solution_min=0, solution_max=1):
@@ -40,14 +45,10 @@ def solve_unique_real(expr, var, solution_min=0, solution_max=1):
 
 @dataclass
 class SilentDuelInput:
-    '''Class representing the static input data to the Silent Duel
-    problem.'''
+    '''Class containing the static input data to the silent duel problem.'''
     player_1_action_count: int
-
     player_2_action_count: int
-
     player_1_action_success: SuccessFn
-
     player_2_action_success: SuccessFn
 
 
@@ -61,6 +62,10 @@ class ActionDistribution:
     cumulative_density_function: Expr
 
     def sample(self):
+        '''Returns a sample from this distribution.'''
+        if support_start >= support_end:  # treat as a point mass
+            return support_start
+
         uniform_random_number = random.random()
         x = Symbol('x', positive=True)
         return solve_unique_real(
@@ -72,34 +77,40 @@ class ActionDistribution:
 
 
 @dataclass
-class SilentDuelOutput:
+class Strategy:
     '''
-    The distribution functions representing the probability of taking each
-    action.
+    A strategy is a list of action distribution functions, each of which
+    describes the probability of taking an action on the interval of its
+    support.
     '''
     action_distributions: List[ActionDistribution]
 
     def sample_game_strategy(self):
+        '''Returns a sample for each action in order.'''
         return [d.sample() for d in self.action_distributions]
 
-    '''
-    Returns the ordered list of action transition times for this player.
-    '''
-
     def transition_times(self):
+        '''Returns the ordered list of action transition times for this player.'''
         times = [self.action_distributions[0].support_start]
         times.extend([d.support_end for d in self.action_distributions])
         return times
 
 
 @dataclass
+class SilentDuelOutput:
+    p1_strategy: Strategy
+    p2_strategy: Strategy
+
+
+@dataclass
 class IntermediateState:
-    '''Class representing the intermediate state of the silent
+    '''Class containing the intermediate state of the silent
     duel construction algorithm. This class is mutated as the
-    algorithm progresses.'''
+    algorithm progresses through computing the transition times
+    and normalization constants for each action distribution.'''
 
     '''
-    A list of the transition times compute thus far. This field
+    A list of the transition times compute so far. This field
     maintains the invariant of being sorted. Thus, the first element
     in the list is a_{i + 1}, the most recently computed value of
     player 1's transition times, and the last element is a_{n + 1} = 1.
@@ -114,7 +125,7 @@ class IntermediateState:
     player_2_transition_times: List[Expr]
 
     '''
-    The values of h_i, normalizing constants for the action
+    The values of h_i so far, the normalizing constants for the action
     probability distributions for player 1. Has the same sorting
     invariant as the transition time lists.
     '''
@@ -128,9 +139,7 @@ class IntermediateState:
 
     @staticmethod
     def new():
-        '''
-        Create a new state object, and set a_{n+1} = 1, b_{m+1}=1.
-        '''
+        '''Create a new state object, and set a_{n+1} = 1, b_{m+1}=1.'''
         return IntermediateState(
             player_1_transition_times=deque([1]),
             player_2_transition_times=deque([1]),
@@ -161,7 +170,7 @@ def f_star(player_action_success: SuccessFn,
 
     The inputs can be chosen so that the appropriate f^* is built
     for either player. I.e., if we want to compute f^* for player 1,
-    player_action_succes should correspond to P, opponent_action_success
+    player_action_success should correspond to P, opponent_action_success
     to Q, and larger_transition_times to the b_j.
 
     If the inputs are switched appropriately, f^* is computed for player 2.
@@ -283,10 +292,10 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
 
     while p1_index > 0 or p2_index > 0:
         # the larger of a_i, b_j is kept as a parameter, then the other will be repeated
-        # in the next iteration; e.g., a_{i-1} and b_j (the latter using a_i in its f*)
+        # in the next iteration; e.g., a_{i-1} and b_j (the latter using a_i in its f^*)
         (a_i, b_j, h_i, k_j) = compute_ai_and_bj(duel_input, intermediate_state)
 
-        # there is one exception, if a_i == b_j, then the computation of f* in the next
+        # there is one exception, if a_i == b_j, then the computation of f^* in the next
         # iteration (I believe) should not include the previously kept parameter. I.e.,
         # in the symmetric version, if a_n is kept and the next computation of b_m uses
         # the previous a_n, then it will produce the wrong value.
@@ -304,18 +313,213 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
     return intermediate_state
 
 
-x = Symbol('x')
-P = Lambda((x,), x)
-Q = Lambda((x,), x**2)
+def subsequent_pairs(the_iterable):
+    '''
+    Given an iterable (a, b, c, d, ...) return a generator over
+    pairs (a, b), (b, c), (c, d), ...
 
-duel_input = SilentDuelInput(
-    player_1_action_count=3,
-    player_2_action_count=3,
-    player_1_action_success=P,
-    player_2_action_success=P,
-)
-compute_as_and_bs(duel_input, alpha=0, beta=0)
+    Return an empty iterable if
+    '''
+    it = iter(the_iterable)
 
-# next: set up tests for symmetric case, implement binary search for alpha, beta.
+    try:
+        pair_first = next(it)
+        pair_second = next(it)
+    except StopIteration:
+        return
 
-f = ActionDistribution(support_start=0, support_end=1, cumulative_density_function=Q)
+    while True:
+        yield (pair_first, pair_second)
+        try:
+            pair_first = pair_second
+            pair_second = next(it)
+        except StopIteration:
+            return
+
+
+def compute_piecewise_action_density(
+        action_start,
+        action_end,
+        opponent_transition_times,
+        normalizing_constant,
+        player_action_success,
+        opponent_action_success,
+        varible):
+    # The density function is a piecewise h_i * f^* with discontinuities
+    # at the values of opponent_transition_times contained in the interval.
+    # Thus, we construct a piecewise function whose pieces correspond to
+    # all the b_j that split the interval (a_i, a_{i+1}).
+    piecewise_components = []
+
+    piece_start = action_start
+    piece_end = action_end
+    for (j, b_j) in enumerate(opponent_transition_times):
+        if b_j > action_end:
+            # after break, the last index j is still set,
+            # and will be used to compute the larger transition
+            # times for the last piece
+            break
+        if action_start < b_j < action_end:
+            # break into a new piece
+            piece_end = b_j
+            larger_transition_times = opponent_transition_times[j:]
+            piece_fstar = f_star(
+                player_action_success,
+                opponent_action_success,
+                variable,
+                larger_transition_times,
+            )
+            piecewise_components.append(tuple(
+                normalizing_constant * piece_fstar,
+                piece_start <= variable <= piece_end
+            ))
+            piece_start = b_j
+            piece_end = action_end
+
+    # at the end, add the last piece, which may be the only piece
+    larger_transition_times = opponent_transition_times[j:]
+    piece_fstar = f_star(
+        player_action_success,
+        opponent_action_success,
+        variablw,
+        larger_transition_times,
+    )
+    piecewise_components.append(tuple(
+        normalizing_constant * piece_fstar,
+        piece_start <= variable <= piece_end
+    ))
+
+    piecewise_components.append((0, True))  # 0 outside the interval
+    return Piecewise(piecewise_components)
+
+
+def compute_strategy(
+        player_action_success: SuccessFn,
+        player_transition_times: List[float],
+        player_normalizing_constants: List[float],
+        opponent_action_success: SuccessFn,
+        opponent_transition_times: List[float],
+        time_1_point_mass: float = 0) -> Strategy:
+    '''
+    Given the transition times for a player, compute the action cumulative
+    density functions for the optimal strategy of the player.
+    '''
+    action_distributions = []
+
+    pairs = subsequent_pairs(player_transition_times)
+    for (i, (action_start, action_end)) in enumerate(pairs):
+        normalizing_constant = player_normalizing_constants[i]
+        x = Symbol('x')
+        piecewise_action_density = compute_piecewise_action_density(
+            action_start,
+            action_end,
+            opponent_transition_times,
+            normalizing_constant,
+            player_action_success,
+            opponent_action_success,
+            x,
+        )
+
+        t = Symbol('t')
+        # piece_action_density is the probability density function, and we
+        # need to integrate it to compute the cumulative density function
+        piece_cdf = Lambda((t,), Integral(
+            piecewise_action_density,
+            (x, action_start, t)
+        ).doit())
+
+        action_distributions.append(ActionDistribution(
+            support_start=action_start,
+            support_end=action_end,
+            cumulative_density_function=piece_cdf
+        ))
+
+    if time_1_point_mass > 0:
+        point_mass = ActionDistribution(
+            support_start=1, support_end=1, cumulative_density_function=1
+        )
+        action_distributions.append(point_mass)
+
+    return Strategy(action_distributions=action_distributions)
+
+
+def compute_player_strategies(silent_duel_input, intermediate_state, alpha, beta):
+    p1_strategy = compute_strategy(
+        player_action_success=silent_duel_input.player_1_action_success,
+        player_transition_times=intermediate_state.player_1_transition_times,
+        player_normalizing_constants=intermediate_state.player_1_normalizing_constants,
+        opponent_action_success=silent_duel_input.player_2_action_success,
+        opponent_transition_times=intermediate_state.player_2_transition_times,
+        time_1_point_mass=alpha,
+    )
+    p2_strategy = compute_strategy(
+        player_action_success=silent_duel_input.player_2_action_success,
+        player_transition_times=intermediate_state.player_2_transition_times,
+        player_normalizing_constants=intermediate_state.player_2_normalizing_constants,
+        opponent_action_success=silent_duel_input.player_1_action_success,
+        opponent_transition_times=intermediate_state.player_1_transition_times,
+        time_1_point_mass=beta,
+    )
+    return SilentDuelOutput(p1_strategy=p1_strategy, p2_strategy=p1_strategy)
+
+
+def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
+    '''Compute an optimal pair of corresponding strategies for the silent duel problem.'''
+    # First compute a's and b's, and check to see if a_1 == b_1, in which case quit.
+    intermediate_state = compute_as_and_bs(silent_duel_input, alpha=0, beta=0)
+    a1 = intermediate_state.player_1_transition_times[0]
+    b1 = intermediate_state.player_2_transition_times[0]
+
+    if abs(a1 - b1) < EPSILON:
+        return compute_player_strategies(
+            silent_duel_input, intermediate_state, alpha, beta,
+        )
+
+    # Otherwise, binary search for an alpha/beta
+    searching_for_beta = b1 < a1
+    if searching_for_beta:
+        def test(beta_value):
+            new_state = compute_as_and_bs(
+                silent_duel_input, alpha=0, beta=beta_value
+            )
+            new_a1 = new_state.player_1_transition_times[0]
+            new_b1 = new_state.player_2_transition_times[0]
+            found = abs(new_a1 - new_b1) < EPSILON
+            return BinarySearchHint(found=found, tooLow=new_b1 < new_a1)
+    else:  # searching for alpha
+        def test(alpha_value):
+            new_state = compute_as_and_bs(
+                silent_duel_input, alpha=alpha_value, beta=0
+            )
+            new_a1 = new_state.player_1_transition_times[0]
+            new_b1 = new_state.player_2_transition_times[0]
+            found = abs(new_a1 - new_b1) < EPSILON
+            return BinarySearchHint(found=found, tooLow=new_a1 < new_b1)
+
+    search_result = binary_search(test, tolerance=EPSILON)
+    assert search_result.found
+
+    # the optimal (alpha, beta) pair have product zero.
+    final_alpha = 0 if searching_for_beta else search_result.value
+    final_beta = search_result.value if searching_for_beta else 0
+
+    intermediate_state = compute_as_and_bs(
+        silent_duel_input, alpha=final_alpha, beta=final_beta
+    )
+    return compute_player_strategies(
+        silent_duel_input, intermediate_state, final_alpha, final_beta
+    )
+
+
+if __name__ == "__main__":
+    x = Symbol('x')
+    P = Lambda((x,), x)
+    Q = Lambda((x,), x**2)
+
+    duel_input = SilentDuelInput(
+        player_1_action_count=3,
+        player_2_action_count=3,
+        player_1_action_success=P,
+        player_2_action_success=Q,
+    )
+    action_densities = optimal_strategies(duel_input)

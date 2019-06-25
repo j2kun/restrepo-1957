@@ -254,6 +254,7 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     k_j = k_j_numerator / k_j_integrated
     # print("k_j = %s" % k_j)
 
+    # print("a={:.2f} b={:.2f}".format(float(a_i), float(b_j)))
     return (a_i, b_j, h_i, k_j)
 
 
@@ -273,7 +274,9 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
     while p1_index > 0 or p2_index > 0:
         # the larger of a_i, b_j is kept as a parameter, then the other will be repeated
         # in the next iteration; e.g., a_{i-1} and b_j (the latter using a_i in its f^*)
-        (a_i, b_j, h_i, k_j) = compute_ai_and_bj(duel_input, intermediate_state)
+        (a_i, b_j, h_i, k_j) = compute_ai_and_bj(
+            duel_input, intermediate_state, alpha=alpha, beta=beta
+        )
 
         # there is one exception, if a_i == b_j, then the computation of f^* in the next
         # iteration (I believe) should not include the previously kept parameter. I.e.,
@@ -281,15 +284,27 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
         # the previous a_n, then it will produce the wrong value.
         #
         # I resolve this by keeping both parameters if a_i == b_j.
-        if a_i >= b_j and p1_index > 0:
+        if abs(a_i - b_j) < EPSILON:
             intermediate_state.add_p1(float(a_i), float(h_i))
-            print("a_{} = {}, h_{} = {}".format(p1_index, float(a_i), p1_index, float(h_i)))
-            p1_index -= 1
-        if b_j >= a_i and p2_index > 0:
             intermediate_state.add_p2(float(b_j), float(k_j))
-            print("b_{} = {}, k_{} = {}".format(p2_index, float(b_j), p2_index, float(k_j)))
+            # print("a_{:d} = {:.2f}, a_{:d} = {:.2f}".format(p1_index, float(a_i), p2_index, float(b_j)))
+            p1_index -= 1
+            p2_index -= 1
+        elif (a_i > b_j and p1_index > 0) or p2_index == 0:
+            intermediate_state.add_p1(float(a_i), float(h_i))
+            # print("a_{} = {}, h_{} = {}".format(p1_index, float(a_i), p1_index, float(h_i)))
+            # print("a_{:d} = {:.2f}".format(p1_index, float(a_i)))
+            p1_index -= 1
+        elif (b_j > a_i and p2_index > 0) or p1_index == 0:
+            intermediate_state.add_p2(float(b_j), float(k_j))
+            # print("b_{} = {}, k_{} = {}".format(p2_index, float(b_j), p2_index, float(k_j)))
+            # print("b_{:d} = {:.2f}".format(p2_index, float(b_j)))
             p2_index -= 1
 
+    print("a_1 = {:.3f} b_1 = {:.3f}".format(
+        intermediate_state.player_1_transition_times[0],
+        intermediate_state.player_2_transition_times[0],
+    ))
     return intermediate_state
 
 
@@ -300,12 +315,13 @@ def compute_piecewise_action_density(
         normalizing_constant,
         player_action_success,
         opponent_action_success,
-        varible):
+        variable):
     # The density function is a piecewise h_i * f^* with discontinuities
     # at the values of opponent_transition_times contained in the interval.
     # Thus, we construct a piecewise function whose pieces correspond to
     # all the b_j that split the interval (a_i, a_{i+1}).
     piecewise_components = []
+    opponent_transition_times = list(opponent_transition_times)
 
     piece_start = action_start
     piece_end = action_end
@@ -337,16 +353,21 @@ def compute_piecewise_action_density(
     piece_fstar = f_star(
         player_action_success,
         opponent_action_success,
-        variablw,
+        variable,
         larger_transition_times,
     )
-    piecewise_components.append(tuple(
+
+    piecewise_components.append((
         normalizing_constant * piece_fstar,
-        piece_start <= variable <= piece_end
+        piece_start <= variable,
+    ))
+    piecewise_components.append((
+        normalizing_constant * piece_fstar,
+        variable <= piece_end,
     ))
 
     piecewise_components.append((0, True))  # 0 outside the interval
-    return Piecewise(piecewise_components)
+    return Piecewise(*piecewise_components)
 
 
 def compute_strategy(
@@ -428,7 +449,7 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
 
     if abs(a1 - b1) < EPSILON:
         return compute_player_strategies(
-            silent_duel_input, intermediate_state, alpha, beta,
+            silent_duel_input, intermediate_state, alpha=0, beta=0,
         )
 
     # Otherwise, binary search for an alpha/beta
@@ -441,7 +462,7 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
             new_a1 = new_state.player_1_transition_times[0]
             new_b1 = new_state.player_2_transition_times[0]
             found = abs(new_a1 - new_b1) < EPSILON
-            return BinarySearchHint(found=found, tooLow=new_b1 < new_a1)
+            return BinarySearchHint(found=found, tooLow=new_b1 < new_a1 - EPSILON)
     else:  # searching for alpha
         def test(alpha_value):
             new_state = compute_as_and_bs(
@@ -450,9 +471,11 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
             new_a1 = new_state.player_1_transition_times[0]
             new_b1 = new_state.player_2_transition_times[0]
             found = abs(new_a1 - new_b1) < EPSILON
-            return BinarySearchHint(found=found, tooLow=new_a1 < new_b1)
+            return BinarySearchHint(found=found, tooLow=new_a1 < new_b1 - EPSILON)
 
-    search_result = binary_search(test, tolerance=EPSILON)
+    search_result = binary_search(
+        test, param_min=0, param_max=1, callback=print
+    )
     assert search_result.found
 
     # the optimal (alpha, beta) pair have product zero.
@@ -468,6 +491,8 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
 
 
 if __name__ == "__main__":
+    '''
+    # Example that requires a binary search
     x = Symbol('x')
     P = Lambda((x,), x)
     Q = Lambda((x,), x**2)
@@ -479,3 +504,18 @@ if __name__ == "__main__":
         player_2_action_success=Q,
     )
     action_densities = optimal_strategies(duel_input)
+    '''
+
+    # Example that does not require a binary search
+    x = Symbol('x')
+    P = Lambda((x,), x)
+    Q = Lambda((x,), x)
+
+    duel_input = SilentDuelInput(
+        player_1_action_count=3,
+        player_2_action_count=3,
+        player_1_action_success=P,
+        player_2_action_success=Q,
+    )
+    action_densities = optimal_strategies(duel_input)
+    print(action_densities)

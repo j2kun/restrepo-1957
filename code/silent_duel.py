@@ -336,7 +336,13 @@ def compute_piecewise_action_density(
     # Thus, we construct a piecewise function whose pieces correspond to
     # all the b_j that split the interval (a_i, a_{i+1}).
     piecewise_components = []
-    opponent_transition_times = list(opponent_transition_times)
+
+    def add_piece(expr, variable, piece_start, piece_end):
+        piecewise_components.append((expr, piece_start <= variable))
+        piecewise_components.append((expr, variable <= piece_end))
+
+    # chop off the last entry, which is always 1
+    opponent_transition_times = list(opponent_transition_times)[:-1]
 
     piece_start = action_start
     piece_end = action_end
@@ -349,22 +355,19 @@ def compute_piecewise_action_density(
         if action_start < b_j < action_end:
             # break into a new piece
             piece_end = b_j
-            larger_transition_times = opponent_transition_times[j:-1]
+            larger_transition_times = opponent_transition_times[j:]
             piece_fstar = f_star(
                 player_action_success,
                 opponent_action_success,
                 variable,
                 larger_transition_times,
             )
-            piecewise_components.append(tuple(
-                normalizing_constant * piece_fstar,
-                piece_start <= variable <= piece_end
-            ))
+            add_piece(normalizing_constant * piece_fstar, variable, piece_start, piece_end)
             piece_start = b_j
             piece_end = action_end
 
     # at the end, add the last piece, which may be the only piece
-    larger_transition_times = opponent_transition_times[j:-1]
+    larger_transition_times = opponent_transition_times[j:]
     piece_fstar = f_star(
         player_action_success,
         opponent_action_success,
@@ -372,16 +375,8 @@ def compute_piecewise_action_density(
         larger_transition_times,
     )
 
-    piecewise_components.append((
-        normalizing_constant * piece_fstar,
-        piece_start <= variable,
-    ))
-    piecewise_components.append((
-        normalizing_constant * piece_fstar,
-        variable <= piece_end,
-    ))
-
-    piecewise_components.append((0, True))  # 0 outside the interval
+    add_piece(normalizing_constant * piece_fstar, variable, piece_start, piece_end)
+    piecewise_components.append((0, True))  # 0 anywhere else
     return Piecewise(*piecewise_components)
 
 
@@ -428,7 +423,9 @@ def compute_strategy(
 
     if time_1_point_mass > 0:
         point_mass = ActionDistribution(
-            support_start=1, support_end=1, cumulative_density_function=1
+            support_start=1,
+            support_end=1,
+            cumulative_density_function=Lambda(Symbol('t'), 1)
         )
         action_distributions.append(point_mass)
 
@@ -452,7 +449,7 @@ def compute_player_strategies(silent_duel_input, intermediate_state, alpha, beta
         opponent_transition_times=intermediate_state.player_1_transition_times,
         time_1_point_mass=beta,
     )
-    return SilentDuelOutput(p1_strategy=p1_strategy, p2_strategy=p1_strategy)
+    return SilentDuelOutput(p1_strategy=p1_strategy, p2_strategy=p2_strategy)
 
 
 def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
@@ -517,7 +514,6 @@ if __name__ == "__main__":
         player_1_action_success=P,
         player_2_action_success=Q,
     )
-    action_densities = optimal_strategies(duel_input)
 
     '''
     # Example that does not require a binary search
@@ -531,6 +527,7 @@ if __name__ == "__main__":
         player_1_action_success=P,
         player_2_action_success=Q,
     )
+    '''
+
     action_densities = optimal_strategies(duel_input)
     print(action_densities)
-    '''

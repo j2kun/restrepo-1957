@@ -41,18 +41,27 @@ class ActionDistribution:
     '''The cumulative density function for the distribution.'''
     cumulative_density_function: Expr
 
+    t = Symbol('t', positive=True)
+
     def sample(self):
         '''Returns a sample from this distribution.'''
         if support_start >= support_end:  # treat as a point mass
             return support_start
 
         uniform_random_number = random.random()
-        x = Symbol('x', positive=True)
         return solve_unique_real(
-            self.cumulative_density_function(x) - uniform_random_number,
-            x,
+            self.cumulative_density_function(self.t) - uniform_random_number,
+            self.t,
             solution_min=self.support_start,
             solution_max=self.support_end,
+        )
+
+    def __str__(self):
+        rounded_df = N(diff(self.cumulative_density_function(self.t), self.t), 2)
+        return '({:.2f}, {:.2f}): dF/dt = {}'.format(
+            self.support_start,
+            self.support_end,
+            rounded_df
         )
 
 
@@ -75,11 +84,17 @@ class Strategy:
         times.extend([d.support_end for d in self.action_distributions])
         return times
 
+    def __str__(self):
+        return '\n'.join([str(x) for x in self.action_distributions])
+
 
 @dataclass
 class SilentDuelOutput:
     p1_strategy: Strategy
     p2_strategy: Strategy
+
+    def __str__(self):
+        return 'P1:\n{}\n\nP2:\n{}'.format(self.p1_strategy, self.p2_strategy)
 
 
 @dataclass
@@ -326,7 +341,7 @@ def compute_piecewise_action_density(
     piece_start = action_start
     piece_end = action_end
     for (j, b_j) in enumerate(opponent_transition_times):
-        if b_j > action_end:
+        if b_j >= action_end:
             # after break, the last index j is still set,
             # and will be used to compute the larger transition
             # times for the last piece
@@ -334,7 +349,7 @@ def compute_piecewise_action_density(
         if action_start < b_j < action_end:
             # break into a new piece
             piece_end = b_j
-            larger_transition_times = opponent_transition_times[j:]
+            larger_transition_times = opponent_transition_times[j:-1]
             piece_fstar = f_star(
                 player_action_success,
                 opponent_action_success,
@@ -349,7 +364,7 @@ def compute_piecewise_action_density(
             piece_end = action_end
 
     # at the end, add the last piece, which may be the only piece
-    larger_transition_times = opponent_transition_times[j:]
+    larger_transition_times = opponent_transition_times[j:-1]
     piece_fstar = f_star(
         player_action_success,
         opponent_action_success,
@@ -491,7 +506,6 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
 
 
 if __name__ == "__main__":
-    '''
     # Example that requires a binary search
     x = Symbol('x')
     P = Lambda((x,), x)
@@ -504,8 +518,8 @@ if __name__ == "__main__":
         player_2_action_success=Q,
     )
     action_densities = optimal_strategies(duel_input)
-    '''
 
+    '''
     # Example that does not require a binary search
     x = Symbol('x')
     P = Lambda((x,), x)
@@ -519,3 +533,4 @@ if __name__ == "__main__":
     )
     action_densities = optimal_strategies(duel_input)
     print(action_densities)
+    '''

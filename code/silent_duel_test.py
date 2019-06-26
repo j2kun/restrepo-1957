@@ -67,3 +67,30 @@ def test_symmetric_duel_linear_action_probability():
 
     for actual, expected in zip(state.player_2_normalizing_constants, expected_normalizers):
         assert_that(actual).is_close_to(expected, EPSILON)
+
+
+def test_symmetric_duel_output_distributions():
+    # a cheap test
+    expected_str = '''P1:
+(0.14, 0.20): dF/dt = 0.083/t**3
+(0.20, 0.33): dF/dt = 0.13/t**3
+(0.33, 1.00): dF/dt = 0.25/t**3
+
+P2:
+(0.14, 0.20): dF/dt = 0.083/t**3
+(0.20, 0.33): dF/dt = 0.13/t**3
+(0.33, 1.00): dF/dt = 0.25/t**3'''
+
+    x = Symbol('x')
+    P = Lambda((x,), x)
+    Q = Lambda((x,), x)
+
+    duel_input = SilentDuelInput(
+        player_1_action_count=3,
+        player_2_action_count=3,
+        player_1_action_success=P,
+        player_2_action_success=Q,
+    )
+    action_densities = optimal_strategies(duel_input)
+
+    assert_that(str(action_densities)).is_equal_to(expected_str)

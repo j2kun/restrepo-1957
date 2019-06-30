@@ -300,21 +300,16 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
         # the previous a_n, then it will produce the wrong value.
         #
         # I resolve this by keeping both parameters if a_i == b_j.
-        if abs(a_i - b_j) < EPSILON:
+        if abs(a_i - b_j) < EPSILON and p1_index > 0 and p2_index > 0:
             intermediate_state.add_p1(float(a_i), float(h_i))
             intermediate_state.add_p2(float(b_j), float(k_j))
-            # print("a_{:d} = {:.2f}, a_{:d} = {:.2f}".format(p1_index, float(a_i), p2_index, float(b_j)))
             p1_index -= 1
             p2_index -= 1
         elif (a_i > b_j and p1_index > 0) or p2_index == 0:
             intermediate_state.add_p1(float(a_i), float(h_i))
-            # print("a_{} = {}, h_{} = {}".format(p1_index, float(a_i), p1_index, float(h_i)))
-            # print("a_{:d} = {:.2f}".format(p1_index, float(a_i)))
             p1_index -= 1
         elif (b_j > a_i and p2_index > 0) or p1_index == 0:
             intermediate_state.add_p2(float(b_j), float(k_j))
-            # print("b_{} = {}, k_{} = {}".format(p2_index, float(b_j), p2_index, float(k_j)))
-            # print("b_{:d} = {:.2f}".format(p2_index, float(b_j)))
             p2_index -= 1
 
     print("a_1 = {:.3f} b_1 = {:.3f}".format(
@@ -336,11 +331,10 @@ def compute_piecewise_action_density(
     # at the values of opponent_transition_times contained in the interval.
     # Thus, we construct a piecewise function whose pieces correspond to
     # all the b_j that split the interval (a_i, a_{i+1}).
-    piecewise_components = []
+    piecewise_components = [(0, variable < action_start), (0, action_end < variable)]
 
     def add_piece(expr, variable, piece_start, piece_end):
-        piecewise_components.append((expr, piece_start <= variable))
-        piecewise_components.append((expr, variable <= piece_end))
+        piecewise_components.append((expr, variable < piece_end))
 
     # chop off the last entry, which is always 1
     opponent_transition_times = list(opponent_transition_times)[:-1]
@@ -377,7 +371,6 @@ def compute_piecewise_action_density(
     )
 
     add_piece(normalizing_constant * piece_fstar, variable, piece_start, piece_end)
-    piecewise_components.append((0, True))  # 0 anywhere else
     return Piecewise(*piecewise_components)
 
 
@@ -411,10 +404,14 @@ def compute_strategy(
         t = Symbol('t')
         # piece_action_density is the probability density function, and we
         # need to integrate it to compute the cumulative density function
-        piece_cdf = Lambda((t,), Integral(
-            piecewise_action_density,
-            (x, action_start, t)
-        ).doit())
+        # Integrating the whole function in one go will cause Sympy to use
+        # strange groupings and Min, which then gets Heaviside involved and
+        # reduces readability (IMO). piecewise_integrate seems to avoid this.
+        piece_cdf = Lambda(
+            (t,),
+            piecewise_action_density.piecewise_integrate(
+                (x, action_start, t)).doit()
+        )
 
         action_distributions.append(ActionDistribution(
             support_start=action_start,

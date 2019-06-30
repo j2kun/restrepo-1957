@@ -233,7 +233,6 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
         solution_min=0,
         solution_max=a_i_plus_one
     )
-    # print("a_i = %s" % a_i)
 
     # the b_j part
     if computing_b_m:
@@ -254,23 +253,19 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
         solution_min=0,
         solution_max=b_j_plus_one
     )
-    # print("b_j = %s" % b_j)
 
     # the h_i part
     h_i_integral = Integral(p1_fstar, (t, a_i, a_i_plus_one))
     h_i_integrated = h_i_integral.doit()
     h_i_numerator = (1 - alpha) if computing_a_n else 1
     h_i = h_i_numerator / h_i_integrated
-    # print("h_i = %s" % h_i)
 
     # the k_j part
     k_j_integral = Integral(p2_fstar, (t, b_j, b_j_plus_one))
     k_j_integrated = k_j_integral.doit()
     k_j_numerator = (1 - beta) if computing_b_m else 1
     k_j = k_j_numerator / k_j_integrated
-    # print("k_j = %s" % k_j)
 
-    # print("a={:.2f} b={:.2f}".format(float(a_i), float(b_j)))
     return (a_i, b_j, h_i, k_j)
 
 
@@ -299,7 +294,7 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
         # in the symmetric version, if a_n is kept and the next computation of b_m uses
         # the previous a_n, then it will produce the wrong value.
         #
-        # I resolve this by keeping both parameters if a_i == b_j.
+        # I resolve this by keeping both parameters when a_i == b_j.
         if abs(a_i - b_j) < EPSILON and p1_index > 0 and p2_index > 0:
             intermediate_state.add_p1(float(a_i), float(h_i))
             intermediate_state.add_p2(float(b_j), float(k_j))
@@ -320,13 +315,13 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
 
 
 def compute_piecewise_action_density(
-        action_start,
-        action_end,
-        opponent_transition_times,
-        normalizing_constant,
-        player_action_success,
-        opponent_action_success,
-        variable):
+        action_start: float,
+        action_end: float,
+        opponent_transition_times: List[float],
+        normalizing_constant: float,
+        player_action_success: SuccessFn,
+        opponent_action_success: SuccessFn,
+        variable: Symbol):
     # The density function is a piecewise h_i * f^* with discontinuities
     # at the values of opponent_transition_times contained in the interval.
     # Thus, we construct a piecewise function whose pieces correspond to
@@ -350,7 +345,7 @@ def compute_piecewise_action_density(
         if action_start < b_j < action_end:
             # break into a new piece
             piece_end = b_j
-            larger_transition_times = opponent_transition_times[j:]
+            larger_transition_times = [x for x in opponent_transition_times if x >= b_j]
             piece_fstar = f_star(
                 player_action_success,
                 opponent_action_success,
@@ -530,12 +525,12 @@ if __name__ == "__main__":
     '''
 
     x = Symbol('x')
-    P = Lambda((x,), x**3)
-    Q = Lambda((x,), x**3)
+    P = Lambda((x,), x)
+    Q = Lambda((x,), x**2)
 
     duel_input = SilentDuelInput(
         player_1_action_count=3,
-        player_2_action_count=3,
+        player_2_action_count=4,
         player_1_action_success=P,
         player_2_action_success=Q,
     )

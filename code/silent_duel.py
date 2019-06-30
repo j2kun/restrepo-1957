@@ -467,7 +467,7 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
             new_a1 = new_state.player_1_transition_times[0]
             new_b1 = new_state.player_2_transition_times[0]
             found = abs(new_a1 - new_b1) < EPSILON
-            return BinarySearchHint(found=found, tooLow=new_b1 < new_a1 - EPSILON)
+            return BinarySearchHint(found=found, tooLow=new_b1 < new_a1)
     else:  # searching for alpha
         def test(alpha_value):
             new_state = compute_as_and_bs(
@@ -476,7 +476,7 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
             new_a1 = new_state.player_1_transition_times[0]
             new_b1 = new_state.player_2_transition_times[0]
             found = abs(new_a1 - new_b1) < EPSILON
-            return BinarySearchHint(found=found, tooLow=new_a1 < new_b1 - EPSILON)
+            return BinarySearchHint(found=found, tooLow=new_a1 < new_b1)
 
     search_result = binary_search(
         test, param_min=0, param_max=1, callback=print

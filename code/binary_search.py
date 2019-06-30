@@ -63,4 +63,4 @@ def binary_search(test, param_min=0, param_max=1, tolerance=1e-9, callback=None)
         else:
             current_max = tested_value
 
-    return BinarySearchResult(found=False)
+    return BinarySearchResult(found=False, value=None)

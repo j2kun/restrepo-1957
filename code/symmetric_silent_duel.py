@@ -97,4 +97,6 @@ def compute_as_and_bs(prob_fun, n, alpha=0):
 
 
 x = Symbol('x')
-compute_as_and_bs(Lambda((x,), x), 10)
+# compute_as_and_bs(Lambda((x,), x), 3)
+
+compute_as_and_bs(Lambda((x,), x**3), 3)

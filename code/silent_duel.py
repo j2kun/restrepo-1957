@@ -1,6 +1,7 @@
 from collections import deque
 from dataclasses import dataclass
 from typing import Any
+from typing import Deque
 from typing import List
 from typing import NewType
 import random
@@ -111,26 +112,26 @@ class IntermediateState:
     player 1's transition times, and the last element is a_{n + 1} = 1.
     This value is set on initializtion with `new`.
     '''
-    player_1_transition_times: List[Expr]
+    player_1_transition_times: Deque[Expr]
 
     '''
     Same as player_1_transition_times, but for player 2 with b_j
     and b_m.
     '''
-    player_2_transition_times: List[Expr]
+    player_2_transition_times: Deque[Expr]
 
     '''
     The values of h_i so far, the normalizing constants for the action
     probability distributions for player 1. Has the same sorting
     invariant as the transition time lists.
     '''
-    player_1_normalizing_constants: List[Expr]
+    player_1_normalizing_constants: Deque[Expr]
 
     '''
     Same as player_1_normalizing_constants, but for player 2,
     i.e., the k_j normalizing constants.
     '''
-    player_2_normalizing_constants: List[Expr]
+    player_2_normalizing_constants: Deque[Expr]
 
     @staticmethod
     def new():
@@ -170,8 +171,8 @@ def f_star(player_action_success: SuccessFn,
 
     If the inputs are switched appropriately, f^* is computed for player 2.
     '''
-    P = player_action_success
-    Q = opponent_action_success
+    P: SuccessFn = player_action_success
+    Q: SuccessFn = opponent_action_success
 
     product = 1
     for a in larger_transition_times:
@@ -196,8 +197,8 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     different; they include some terms involving alpha and beta. In all
     other cases, the alpha and beta parameters are unused.
     '''
-    P = duel_input.player_1_action_success
-    Q = duel_input.player_2_action_success
+    P: SuccessFn = duel_input.player_1_action_success
+    Q: SuccessFn = duel_input.player_2_action_success
     t = Symbol('t0', positive=True)
     a_i = Symbol('a_i', positive=True)
     b_j = Symbol('b_j', positive=True)
@@ -503,6 +504,7 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
 
 
 if __name__ == "__main__":
+    '''
     # Example that requires a binary search
     x = Symbol('x')
     P = Lambda((x,), x)
@@ -514,6 +516,7 @@ if __name__ == "__main__":
         player_1_action_success=P,
         player_2_action_success=Q,
     )
+    '''
 
     '''
     # Example that does not require a binary search
@@ -528,6 +531,17 @@ if __name__ == "__main__":
         player_2_action_success=Q,
     )
     '''
+
+    x = Symbol('x')
+    P = Lambda((x,), x**3)
+    Q = Lambda((x,), x**3)
+
+    duel_input = SilentDuelInput(
+        player_1_action_count=3,
+        player_2_action_count=3,
+        player_1_action_success=P,
+        player_2_action_success=Q,
+    )
 
     action_densities = optimal_strategies(duel_input)
     print(action_densities)

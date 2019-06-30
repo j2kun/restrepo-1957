@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -24,7 +25,7 @@ class BinarySearchResult:
     Otherwise, the value is undefined, but set to None by default. If
     found=True and value=None, then None is the value found during the search.
     '''
-    value: float = None
+    value: Optional[float] = None
 
 
 def binary_search(test, param_min=0, param_max=1, tolerance=1e-9, callback=None):

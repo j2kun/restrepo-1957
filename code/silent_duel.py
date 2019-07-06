@@ -432,16 +432,23 @@ def compute_strategy(
         )
 
         t = Symbol('t')
-        # piece_action_density is the probability density function, and we
-        # need to integrate it to compute the cumulative density function
-        # Integrating the whole function in one go will cause Sympy to use
-        # strange groupings and Min, which then gets Heaviside involved and
-        # reduces readability (IMO). piecewise_integrate seems to avoid this.
-        piece_cdf = Lambda(
-            (t,),
-            piecewise_action_density.piecewise_integrate(
-                (x, action_start, t)).doit()
-        )
+        '''
+        piece_action_density is a(possible piecewise - defined) probability
+        density function, and we need to integrate it to compute the
+        cumulative density function.
+
+        Integrating the whole function in one go will cause Sympy to use
+        strange groupings and Min, which then gets Heaviside involved and
+        reduces readability (IMO). piecewise_integrate seems to avoid this.
+
+        Note piecewise_integrate doesn't replace the endpoints of a piecewise
+        function's pieces, so we apply subs(x, t) to the output to update the
+        domain endpoints. This has no effect on the function because there are
+        no x's left after integrating.
+        '''
+        integrated = piecewise_action_density.piecewise_integrate(
+            (x, action_start, t)).subs(x, t)
+        piece_cdf = Lambda((t,), integrated)
 
         action_distributions.append(ActionDistribution(
             support_start=action_start,
@@ -449,14 +456,7 @@ def compute_strategy(
             cumulative_density_function=piece_cdf
         ))
 
-    if time_1_point_mass > 0:
-        point_mass = ActionDistribution(
-            support_start=1,
-            support_end=1,
-            cumulative_density_function=Lambda(Symbol('t'), 1)
-        )
-        action_distributions.append(point_mass)
-
+    action_distributions[-1].point_mass = time_1_point_mass
     return Strategy(action_distributions=action_distributions)
 
 
@@ -525,9 +525,18 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
     intermediate_state = compute_as_and_bs(
         silent_duel_input, alpha=final_alpha, beta=final_beta
     )
-    return compute_player_strategies(
+    player_strategies = compute_player_strategies(
         silent_duel_input, intermediate_state, final_alpha, final_beta
     )
+
+    # validate the output distributions for safety
+    for ad in player_strategies.p1_strategy.action_distributions:
+        ad.validate()
+
+    for ad in player_strategies.p2_strategy.action_distributions:
+        ad.validate()
+
+    return player_strategies
 
 
 if __name__ == "__main__":

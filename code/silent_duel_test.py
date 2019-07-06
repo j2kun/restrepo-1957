@@ -70,16 +70,17 @@ def test_symmetric_duel_linear_action_probability():
 
 
 def test_symmetric_duel_output_distributions():
-    # a cheap test
-    expected_str = '''P1:
-(0.14, 0.20): dF/dt = 0.083/t**3
-(0.20, 0.33): dF/dt = 0.13/t**3
-(0.33, 1.00): dF/dt = 0.25/t**3
-
-P2:
-(0.14, 0.20): dF/dt = 0.083/t**3
-(0.20, 0.33): dF/dt = 0.13/t**3
-(0.33, 1.00): dF/dt = 0.25/t**3'''
+    expected_transitions = [
+        1 / 7,
+        1 / 5,
+        1 / 3,
+        1,
+    ]
+    expected_df_coeffs = [
+        1 / 12,
+        1 / 8,
+        1 / 4,
+    ]
 
     x = Symbol('x')
     P = Lambda((x,), x)
@@ -91,6 +92,29 @@ P2:
         player_1_action_success=P,
         player_2_action_success=Q,
     )
-    action_densities = optimal_strategies(duel_input)
+    player_strategies = optimal_strategies(duel_input)
+    p1_strategy = player_strategies.p1_strategy
+    p2_strategy = player_strategies.p2_strategy
 
-    assert_that(str(action_densities)).is_equal_to(expected_str)
+    assert_that(p1_strategy).is_equal_to(p2_strategy)
+    assert_that(p1_strategy.transition_times()).is_equal_to(expected_transitions)
+
+    for i in range(3):
+        print(i)
+        actual_ad = p1_strategy.action_distributions[i]
+        assert_that(actual_ad.support_start).is_equal_to(expected_transitions[i])
+        assert_that(actual_ad.support_end).is_equal_to(expected_transitions[i + 1])
+        assert_that(actual_ad.point_mass).is_equal_to(0)
+
+        cdf = actual_ad.cumulative_density_function.expr
+        for (expr, interval) in cdf.as_expr_set_pairs():
+            if expr.is_Atom:
+                assert_that(float(expr)).is_equal_to(0.0)
+            else:
+                if isinstance(expr, Lambda):
+                    expr = expr.expr
+                t = list(expr.free_symbols)[0]
+                expected_df = expected_df_coeffs[i] / t ** 3
+                assert_that(expr.diff(t)).is_equal_to(expected_df)
+                assert_that(float(interval.start)).is_close_to(expected_transitions[i], EPSILON)
+                assert_that(float(interval.end)).is_close_to(expected_transitions[i + 1], EPSILON)

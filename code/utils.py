@@ -1,7 +1,6 @@
 from sympy.solvers import solve
 
 
-
 def solve_unique_real(expr, var, solution_min=0, solution_max=1):
     '''
     Solve an equation and return any solution in the given range. This should

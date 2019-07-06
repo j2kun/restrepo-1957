@@ -372,10 +372,10 @@ def compute_piecewise_action_density(
     piece_start = action_start
     piece_end = action_end
     for b_j in opponent_transition_times:
-        if action_start < b_j < action_end:
+        if action_start + EPSILON < b_j < action_end - EPSILON:
             # break into a new piece
             piece_end = b_j
-            larger_transition_times = [x for x in opponent_transition_times if x >= b_j]
+            larger_transition_times = [x for x in opponent_transition_times if x >= b_j - EPSILON]
             piece_fstar = f_star(
                 player_action_success,
                 opponent_action_success,
@@ -387,7 +387,7 @@ def compute_piecewise_action_density(
             piece_end = action_end
 
     # at the end, add the last piece, which may be the only piece
-    larger_transition_times = [x for x in opponent_transition_times if x >= action_end]
+    larger_transition_times = [x for x in opponent_transition_times if x >= action_end - EPSILON]
     piece_fstar = f_star(
         player_action_success,
         opponent_action_success,
@@ -520,6 +520,8 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
     intermediate_state = compute_as_and_bs(
         silent_duel_input, alpha=final_alpha, beta=final_beta
     )
+    print(intermediate_state.player_1_transition_times)
+    print(intermediate_state.player_2_transition_times)
     player_strategies = compute_player_strategies(
         silent_duel_input, intermediate_state, final_alpha, final_beta
     )

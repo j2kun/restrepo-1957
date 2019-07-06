@@ -20,7 +20,7 @@ def solve_unique_real(expr, var, solution_min=0, solution_max=1):
         solutions = [x for x in solutions if x <= solution_max]
 
     assert len(solutions) == 1, "Expected unique solution but found {}".format(solutions)
-    return solutions[0]
+    return float(solutions[0])
 
 
 def subsequent_pairs(the_iterable):

@@ -110,9 +110,9 @@ class Strategy:
     '''
     action_distributions: List[ActionDistribution]
 
-    def sample_game_strategy(self):
-        '''Returns a sample for each action in order.'''
-        return [d.sample() for d in self.action_distributions]
+    def draw_game_strategy(self):
+        '''Returns a draw for each action in order.'''
+        return [d.draw() for d in self.action_distributions]
 
     def transition_times(self):
         '''Returns the ordered list of action transition times for this player.'''

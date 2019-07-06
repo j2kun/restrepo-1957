@@ -540,9 +540,9 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
 
 
 if __name__ == "__main__":
-    '''
-    # Example that requires a binary search
     x = Symbol('x')
+
+    # Example that requires a binary search
     P = Lambda((x,), x)
     Q = Lambda((x,), x**2)
 
@@ -552,11 +552,9 @@ if __name__ == "__main__":
         player_1_action_success=P,
         player_2_action_success=Q,
     )
-    '''
 
     '''
     # Example that does not require a binary search
-    x = Symbol('x')
     P = Lambda((x,), x)
     Q = Lambda((x,), x)
 
@@ -568,7 +566,7 @@ if __name__ == "__main__":
     )
     '''
 
-    x = Symbol('x')
+    '''
     P = Lambda((x,), x)
     Q = Lambda((x,), x**2)
 
@@ -578,6 +576,8 @@ if __name__ == "__main__":
         player_1_action_success=P,
         player_2_action_success=Q,
     )
+    '''
 
+    print("Input: {}".format(duel_input))
     action_densities = optimal_strategies(duel_input)
     print(action_densities)

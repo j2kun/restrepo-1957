@@ -39,8 +39,18 @@ class ActionDistribution:
     support_start: float
     support_end: float
 
-    '''The cumulative density function for the distribution.'''
+    '''
+    The cumulative density function for the distribution.
+
+    May be improper if point_mass > 0.
+    '''
     cumulative_density_function: Expr
+
+    '''
+    If nonzero, corresponds to an extra point mass at the support_end.
+    Only used in the last action in the optimal strategy.
+    '''
+    point_mass: float = 0
 
     t = Symbol('t', positive=True)
 
@@ -50,6 +60,13 @@ class ActionDistribution:
             return support_start
 
         uniform_random_number = random.random()
+
+        if self.point_mass:
+            return uniform_random_number < self.point_mass
+        else:
+            uniform_random_number -= self.point_mass
+            uniform_random_number = max(0, uniform_random_number)
+
         return solve_unique_real(
             self.cumulative_density_function(self.t) - uniform_random_number,
             self.t,
@@ -57,13 +74,24 @@ class ActionDistribution:
             solution_max=self.support_end,
         )
 
+    def validate(self):
+        '''Ensure the action distribution has probability summing to 1.'''
+        df = diff(self.cumulative_density_function(self.t), self.t)
+        total_prob_in_support = N(Integral(df, (self.t, self.support_start, self.support_end)).doit())
+        print("Validating. prob_mass={} point_mass={}".format(total_prob_in_support, self.point_mass))
+        assert abs(self.point_mass + total_prob_in_support - 1) < EPSILON
+
     def __str__(self):
         rounded_df = N(diff(self.cumulative_density_function(self.t), self.t), 2)
-        return '({:.2f}, {:.2f}): dF/dt = {}'.format(
+        s = '({:.2f}, {:.2f}): dF/dt = {}'.format(
             self.support_start,
             self.support_end,
             rounded_df
         )
+        if self.point_mass > 0:
+            s += '; Point mass of {:G} at {:.2f}'.format(
+                self.point_mass, self.support_end)
+        return s
 
 
 @dataclass

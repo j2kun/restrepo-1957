@@ -24,6 +24,10 @@ SuccessFn = NewType('SuccessFn', Lambda)
 EPSILON = 1e-6
 
 
+def DEFAULT_RNG():
+    return random.random()
+
+
 @dataclass
 class SilentDuelInput:
     '''Class containing the static input data to the silent duel problem.'''
@@ -44,7 +48,7 @@ class ActionDistribution:
 
     May be improper if point_mass > 0.
     '''
-    cumulative_density_function: Expr
+    cumulative_density_function: Lambda
 
     '''
     If nonzero, corresponds to an extra point mass at the support_end.
@@ -52,20 +56,23 @@ class ActionDistribution:
     '''
     point_mass: float = 0
 
-    t = Symbol('t', positive=True)
+    t = Symbol('t', nonnegative=True)
 
-    def sample(self):
-        '''Returns a sample from this distribution.'''
-        if support_start >= support_end:  # treat as a point mass
-            return support_start
+    def draw(self, uniform_random_01=DEFAULT_RNG):
+        '''Return a random draw from this distribution.
 
-        uniform_random_number = random.random()
+        Args:
+         - uniform_random_01: a callable that accepts zero arguments
+           and returns a uniform random float between 0 and 1. Defaults
+           to using python's standard random.random
+        '''
+        if self.support_start >= self.support_end:  # treat as a point mass
+            return self.support_start
 
-        if self.point_mass:
-            return uniform_random_number < self.point_mass
-        else:
-            uniform_random_number -= self.point_mass
-            uniform_random_number = max(0, uniform_random_number)
+        uniform_random_number = uniform_random_01()
+
+        if uniform_random_number > 1 - self.point_mass - EPSILON:
+            return self.support_end
 
         return solve_unique_real(
             self.cumulative_density_function(self.t) - uniform_random_number,
@@ -227,9 +234,9 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     '''
     P: SuccessFn = duel_input.player_1_action_success
     Q: SuccessFn = duel_input.player_2_action_success
-    t = Symbol('t0', positive=True)
-    a_i = Symbol('a_i', positive=True)
-    b_j = Symbol('b_j', positive=True)
+    t = Symbol('t0', nonnegative=True)
+    a_i = Symbol('a_i', nonnegative=True)
+    b_j = Symbol('b_j', nonnegative=True)
 
     p1_transitions = intermediate_state.player_1_transition_times
     p2_transitions = intermediate_state.player_2_transition_times
@@ -304,7 +311,7 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
     Compute the a's and b's for the silent duel, given a fixed
     alpha and beta as input.
     '''
-    t = Symbol('t0', positive=True)
+    t = Symbol('t0', nonnegative=True)
 
     p1_index = duel_input.player_1_action_count
     p2_index = duel_input.player_2_action_count

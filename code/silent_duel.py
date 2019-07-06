@@ -371,12 +371,7 @@ def compute_piecewise_action_density(
 
     piece_start = action_start
     piece_end = action_end
-    for (j, b_j) in enumerate(opponent_transition_times):
-        if b_j >= action_end:
-            # after break, the last index j is still set,
-            # and will be used to compute the larger transition
-            # times for the last piece
-            break
+    for b_j in opponent_transition_times:
         if action_start < b_j < action_end:
             # break into a new piece
             piece_end = b_j
@@ -392,7 +387,7 @@ def compute_piecewise_action_density(
             piece_end = action_end
 
     # at the end, add the last piece, which may be the only piece
-    larger_transition_times = opponent_transition_times[j:]
+    larger_transition_times = [x for x in opponent_transition_times if x >= action_end]
     piece_fstar = f_star(
         player_action_success,
         opponent_action_success,

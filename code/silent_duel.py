@@ -21,7 +21,7 @@ from utils import subsequent_pairs
 from utils import solve_unique_real
 
 SuccessFn = NewType('SuccessFn', Lambda)
-EPSILON = 1e-6
+EPSILON = 1e-8
 
 
 def DEFAULT_RNG():

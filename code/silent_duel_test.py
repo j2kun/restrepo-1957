@@ -8,7 +8,7 @@ from sympy import N
 from sympy import Symbol
 
 
-EPSILON = 1e-3
+EPSILON = 1e-6
 
 
 def test_symmetric_duel_linear_action_probability():
@@ -118,3 +118,41 @@ def test_symmetric_duel_output_distributions():
                 assert_that(expr.diff(t)).is_equal_to(expected_df)
                 assert_that(float(interval.start)).is_close_to(expected_transitions[i], EPSILON)
                 assert_that(float(interval.end)).is_close_to(expected_transitions[i + 1], EPSILON)
+
+
+def test_asymmetric_duel_action_counts_equal():
+    x = Symbol('x')
+    P = Lambda((x,), x)
+    Q = Lambda((x,), x**2)
+
+    duel_input = SilentDuelInput(
+        player_1_action_count=3,
+        player_2_action_count=3,
+        player_1_action_success=P,
+        player_2_action_success=Q,
+    )
+
+    output = optimal_strategies(duel_input)
+
+    assert_that(output.p1_strategy.action_distributions).is_length(3)
+    assert_that(output.p2_strategy.action_distributions).is_length(3)
+
+
+'''
+def test_asymmetric_duel_action_counts_differ():
+    x = Symbol('x')
+    P = Lambda((x,), x)
+    Q = Lambda((x,), x**2)
+
+    duel_input = SilentDuelInput(
+        player_1_action_count=3,
+        player_2_action_count=4,
+        player_1_action_success=P,
+        player_2_action_success=Q,
+    )
+
+    output = optimal_strategies(duel_input)
+
+    assert_that(output.p1_strategy.action_distributions).is_length(3)
+    assert_that(output.p2_strategy.action_distributions).is_length(4)
+'''

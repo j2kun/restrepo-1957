@@ -11,6 +11,18 @@ from sympy import Symbol
 EPSILON = 1e-6
 
 
+def validate_action_dists(silent_duel_output):
+    print("Validating P1")
+    for action_dist in silent_duel_output.p1_strategy.action_distributions:
+        print("Validating %s", action_dist)
+        action_dist.validate()
+
+    print("Validating P2")
+    for action_dist in silent_duel_output.p2_strategy.action_distributions:
+        print("Validating %s", action_dist)
+        action_dist.validate()
+
+
 def test_symmetric_duel_linear_action_probability():
     x = Symbol('x')
     P = Lambda((x,), x)
@@ -120,22 +132,30 @@ def test_symmetric_duel_output_distributions():
                 assert_that(float(interval.end)).is_close_to(expected_transitions[i + 1], EPSILON)
 
 
-def test_asymmetric_duel_action_counts_equal():
+def test_asymmetric_duel_one_action_proper_alpha_beta():
     x = Symbol('x')
     P = Lambda((x,), x)
     Q = Lambda((x,), x**2)
 
     duel_input = SilentDuelInput(
-        player_1_action_count=3,
-        player_2_action_count=3,
+        player_1_action_count=1,
+        player_2_action_count=1,
         player_1_action_success=P,
         player_2_action_success=Q,
     )
 
     output = optimal_strategies(duel_input)
 
-    assert_that(output.p1_strategy.action_distributions).is_length(3)
-    assert_that(output.p2_strategy.action_distributions).is_length(3)
+    assert_that(output.p1_strategy.action_distributions).is_length(1)
+    assert_that(output.p2_strategy.action_distributions).is_length(1)
+
+    p1_dist = output.p1_strategy.action_distributions[0]
+    p2_dist = output.p2_strategy.action_distributions[0]
+
+    assert_that(p1_dist.support_start).is_close_to(0.481, 1e-3)
+    assert_that(p2_dist.support_start).is_close_to(0.481, 1e-3)
+    assert_that(p2_dist.point_mass).is_close_to(0.158, 1e-3)
+    validate_action_dists(output)
 
 
 '''
@@ -155,4 +175,5 @@ def test_asymmetric_duel_action_counts_differ():
 
     assert_that(output.p1_strategy.action_distributions).is_length(3)
     assert_that(output.p2_strategy.action_distributions).is_length(4)
+    validate_action_dists(output)
 '''

@@ -249,14 +249,13 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     computing_a_n = a_i_plus_one == 1
     computing_b_m = b_j_plus_one == 1
 
+    p1_fstar_parameters = list(p2_transitions)[:-1]  # ignore b_{m+1} = 1
+    p1_fstar = f_star(P, Q, t, p1_fstar_parameters)
     # the a_i part
     if computing_a_n:
-        p1_fstar = f_star(P, Q, t, [])
         p1_integrand = ((1 + alpha) - (1 - alpha) * P(t)) * p1_fstar
         p1_integral_target = 2 * (1 - alpha)
     else:
-        p1_fstar_parameters = list(p2_transitions)[:-1]  # ignore b_{m+1} = 1
-        p1_fstar = f_star(P, Q, t, p1_fstar_parameters)
         p1_integrand = (1 - P(t)) * p1_fstar
         p1_integral_target = 1 / intermediate_state.player_1_normalizing_constants[0]
 
@@ -270,13 +269,12 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     )
 
     # the b_j part
+    p2_fstar_parameters = list(p1_transitions)[:-1]  # ignore a_{n+1} = 1
+    p2_fstar = f_star(Q, P, t, p2_fstar_parameters)
     if computing_b_m:
-        p2_fstar = f_star(Q, P, t, [])
         p2_integrand = ((1 + beta) - (1 - beta) * P(t)) * p2_fstar
         p2_integral_target = 2 * (1 - beta)
     else:
-        p2_fstar_parameters = list(p1_transitions)[:-1]  # ignore a_{n+1} = 1
-        p2_fstar = f_star(Q, P, t, p2_fstar_parameters)
         p2_integrand = (1 - P(t)) * p2_fstar
         p2_integral_target = 1 / intermediate_state.player_2_normalizing_constants[0]
 
@@ -526,12 +524,14 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
         silent_duel_input, intermediate_state, final_alpha, final_beta
     )
 
+    '''
     # validate the output distributions for safety
     for ad in player_strategies.p1_strategy.action_distributions:
         ad.validate()
 
     for ad in player_strategies.p2_strategy.action_distributions:
         ad.validate()
+    '''
 
     return player_strategies
 

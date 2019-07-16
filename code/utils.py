@@ -11,7 +11,7 @@ def solve_unique_real(expr, var, solution_min=0, solution_max=1):
     unique global real solution. By default the range bound is [0,1].
     '''
     # print("solving {} = 0 for {}".format(expr, var))
-    solutions = solve(expr, var)
+    solutions = solve(expr, var, minimal=True, quick=True)
     solutions = [x for x in solutions if x.is_real]
     if solution_min is not None:
         solutions = [x for x in solutions if x >= solution_min]

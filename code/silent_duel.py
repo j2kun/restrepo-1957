@@ -15,10 +15,10 @@ from sympy import Symbol
 from sympy import diff
 from sympy.solvers import solve
 
-from binary_search import binary_search
 from binary_search import BinarySearchHint
-from utils import subsequent_pairs
+from binary_search import binary_search
 from utils import solve_unique_real
+from utils import subsequent_pairs
 
 SuccessFn = NewType('SuccessFn', Lambda)
 EPSILON = 1e-8
@@ -90,13 +90,13 @@ class ActionDistribution:
 
     def __str__(self):
         rounded_df = N(diff(self.cumulative_density_function(self.t), self.t), 2)
-        s = '({:.2f}, {:.2f}): dF/dt = {}'.format(
+        s = '({:.3f}, {:.3f}): dF/dt = {}'.format(
             self.support_start,
             self.support_end,
             rounded_df
         )
         if self.point_mass > 0:
-            s += '; Point mass of {:G} at {:.2f}'.format(
+            s += '; Point mass of {:G} at {:.3f}'.format(
                 self.point_mass, self.support_end)
         return s
 
@@ -234,9 +234,9 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     '''
     P: SuccessFn = duel_input.player_1_action_success
     Q: SuccessFn = duel_input.player_2_action_success
-    t = Symbol('t0', nonnegative=True)
-    a_i = Symbol('a_i', nonnegative=True)
-    b_j = Symbol('b_j', nonnegative=True)
+    t = Symbol('t0', nonnegative=True, real=True)
+    a_i = Symbol('a_i', positive=True, real=True)
+    b_j = Symbol('b_j', positive=True, real=True)
 
     p1_transitions = intermediate_state.player_1_transition_times
     p2_transitions = intermediate_state.player_2_transition_times
@@ -309,7 +309,7 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
     Compute the a's and b's for the silent duel, given a fixed
     alpha and beta as input.
     '''
-    t = Symbol('t0', nonnegative=True)
+    t = Symbol('t0', nonnegative=True, real=True)
 
     p1_index = duel_input.player_1_action_count
     p2_index = duel_input.player_2_action_count
@@ -413,7 +413,7 @@ def compute_strategy(
     pairs = subsequent_pairs(player_transition_times)
     for (i, (action_start, action_end)) in enumerate(pairs):
         normalizing_constant = player_normalizing_constants[i]
-        x = Symbol('x')
+        x = Symbol('x', real=True)
         piecewise_action_density = compute_piecewise_action_density(
             action_start,
             action_end,
@@ -424,7 +424,7 @@ def compute_strategy(
             x,
         )
 
-        t = Symbol('t')
+        t = Symbol('t', real=True)
         '''
         piece_action_density is a(possible piecewise - defined) probability
         density function, and we need to integrate it to compute the
@@ -534,47 +534,3 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
     '''
 
     return player_strategies
-
-
-if __name__ == "__main__":
-    x = Symbol('x')
-
-    # Example that requires a binary search
-    P = Lambda((x,), x)
-    Q = Lambda((x,), x**2)
-
-    duel_input = SilentDuelInput(
-        player_1_action_count=3,
-        player_2_action_count=3,
-        player_1_action_success=P,
-        player_2_action_success=Q,
-    )
-
-    '''
-    # Example that does not require a binary search
-    P = Lambda((x,), x)
-    Q = Lambda((x,), x)
-
-    duel_input = SilentDuelInput(
-        player_1_action_count=3,
-        player_2_action_count=3,
-        player_1_action_success=P,
-        player_2_action_success=Q,
-    )
-    '''
-
-    '''
-    P = Lambda((x,), x)
-    Q = Lambda((x,), x**2)
-
-    duel_input = SilentDuelInput(
-        player_1_action_count=3,
-        player_2_action_count=4,
-        player_1_action_success=P,
-        player_2_action_success=Q,
-    )
-    '''
-
-    print("Input: {}".format(duel_input))
-    action_densities = optimal_strategies(duel_input)
-    print(action_densities)

@@ -18,3 +18,4 @@ duel_input = SilentDuelInput(
 )
 
 output = optimal_strategies(duel_input)
+output.validate(err_on_fail=False)

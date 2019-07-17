@@ -7,7 +7,6 @@ from sympy import Lambda
 from sympy import Symbol
 
 
-EPSILON = 1e-3
 x = Symbol('x')
 
 

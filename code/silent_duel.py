@@ -4,6 +4,7 @@ from typing import Any
 from typing import Deque
 from typing import List
 from typing import NewType
+from typing import Iterable
 import random
 
 from sympy import Expr
@@ -21,7 +22,7 @@ from utils import solve_unique_real
 from utils import subsequent_pairs
 
 SuccessFn = NewType('SuccessFn', Lambda)
-EPSILON = 1e-8
+EPSILON = 1e-10
 
 
 def DEFAULT_RNG():
@@ -81,12 +82,18 @@ class ActionDistribution:
             solution_max=self.support_end,
         )
 
-    def validate(self):
+    def validate(self, err_on_fail=True):
         '''Ensure the action distribution has probability summing to 1.'''
         df = diff(self.cumulative_density_function(self.t), self.t)
         total_prob_in_support = N(Integral(df, (self.t, self.support_start, self.support_end)).doit())
-        print("Validating. prob_mass={} point_mass={}".format(total_prob_in_support, self.point_mass))
-        assert abs(self.point_mass + total_prob_in_support - 1) < EPSILON
+        result = abs(self.point_mass + total_prob_in_support - 1) < EPSILON
+        result_str = '' if result else 'INVALID'
+        print("Validating. prob_mass={} point_mass={}   {}".format(
+            total_prob_in_support, self.point_mass, result_str))
+        if not result:
+            print("Probability distribution does not have mass 1: {}".format(self))
+            if err_on_fail:
+                raise ValueError("Probability distribution does not have mass 1: {}".format(self))
 
     def __str__(self):
         rounded_df = N(diff(self.cumulative_density_function(self.t), self.t), 2)
@@ -99,6 +106,9 @@ class ActionDistribution:
             s += '; Point mass of {:G} at {:.3f}'.format(
                 self.point_mass, self.support_end)
         return s
+
+    def __repr__(self):
+        return str(self)
 
 
 @dataclass
@@ -120,8 +130,15 @@ class Strategy:
         times.extend([d.support_end for d in self.action_distributions])
         return times
 
+    def validate(self, err_on_fail=True):
+        for action_dist in self.action_distributions:
+            action_dist.validate(err_on_fail=err_on_fail)
+
     def __str__(self):
         return '\n'.join([str(x) for x in self.action_distributions])
+
+    def __repr__(self):
+        return str(self)
 
 
 @dataclass
@@ -129,8 +146,17 @@ class SilentDuelOutput:
     p1_strategy: Strategy
     p2_strategy: Strategy
 
+    def validate(self, err_on_fail=True):
+        print("Validating P1")
+        self.p1_strategy.validate(err_on_fail=err_on_fail)
+        print("Validating P2")
+        self.p2_strategy.validate(err_on_fail=err_on_fail)
+
     def __str__(self):
         return 'P1:\n{}\n\nP2:\n{}'.format(self.p1_strategy, self.p2_strategy)
+
+    def __repr__(self):
+        return str(self)
 
 
 @dataclass
@@ -147,26 +173,26 @@ class IntermediateState:
     player 1's transition times, and the last element is a_{n + 1} = 1.
     This value is set on initializtion with `new`.
     '''
-    player_1_transition_times: Deque[Expr]
+    player_1_transition_times: Deque[float]
 
     '''
     Same as player_1_transition_times, but for player 2 with b_j
     and b_m.
     '''
-    player_2_transition_times: Deque[Expr]
+    player_2_transition_times: Deque[float]
 
     '''
     The values of h_i so far, the normalizing constants for the action
     probability distributions for player 1. Has the same sorting
     invariant as the transition time lists.
     '''
-    player_1_normalizing_constants: Deque[Expr]
+    player_1_normalizing_constants: Deque[float]
 
     '''
     Same as player_1_normalizing_constants, but for player 2,
     i.e., the k_j normalizing constants.
     '''
-    player_2_normalizing_constants: Deque[Expr]
+    player_2_normalizing_constants: Deque[float]
 
     @staticmethod
     def new():
@@ -196,7 +222,7 @@ for each player.
 def f_star(player_action_success: SuccessFn,
            opponent_action_success: SuccessFn,
            variable: Symbol,
-           larger_transition_times: List[float]) -> Expr:
+           larger_transition_times: Iterable[float]) -> Expr:
     '''Compute f^* as in Restrepo '57.
 
     The inputs can be chosen so that the appropriate f^* is built
@@ -487,6 +513,7 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
 
     # Otherwise, binary search for an alpha/beta
     searching_for_beta = b1 < a1
+    print('Binary searching for ' + ('beta' if searching_for_beta else 'apha'))
     if searching_for_beta:
         def test(beta_value):
             new_state = compute_as_and_bs(

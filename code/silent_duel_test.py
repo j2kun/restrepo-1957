@@ -11,18 +11,6 @@ from sympy import Symbol
 EPSILON = 1e-6
 
 
-def validate_action_dists(silent_duel_output):
-    print("Validating P1")
-    for action_dist in silent_duel_output.p1_strategy.action_distributions:
-        print("Validating %s", action_dist)
-        action_dist.validate()
-
-    print("Validating P2")
-    for action_dist in silent_duel_output.p2_strategy.action_distributions:
-        print("Validating %s", action_dist)
-        action_dist.validate()
-
-
 def test_symmetric_duel_linear_action_probability():
     x = Symbol('x')
     P = Lambda((x,), x)
@@ -154,8 +142,8 @@ def test_asymmetric_duel_one_action_proper_alpha_beta():
 
     assert_that(p1_dist.support_start).is_close_to(0.481, 1e-3)
     assert_that(p2_dist.support_start).is_close_to(0.481, 1e-3)
-    assert_that(p2_dist.point_mass).is_close_to(0.158, 1e-3)
-    validate_action_dists(output)
+    assert_that(p2_dist.point_mass).is_close_to(0.0728, 1e-3)
+    output.validate(err_on_fail=True)
 
 
 '''
@@ -175,5 +163,4 @@ def test_asymmetric_duel_action_counts_differ():
 
     assert_that(output.p1_strategy.action_distributions).is_length(3)
     assert_that(output.p2_strategy.action_distributions).is_length(4)
-    validate_action_dists(output)
 '''

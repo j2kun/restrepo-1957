@@ -22,7 +22,8 @@ from utils import solve_unique_real
 from utils import subsequent_pairs
 
 SuccessFn = NewType('SuccessFn', Lambda)
-EPSILON = 1e-10
+EPSILON = 1e-12
+SEARCH_EPSILON = 1e-6
 
 
 def DEFAULT_RNG():
@@ -171,7 +172,7 @@ class IntermediateState:
     maintains the invariant of being sorted. Thus, the first element
     in the list is a_{i + 1}, the most recently computed value of
     player 1's transition times, and the last element is a_{n + 1} = 1.
-    This value is set on initializtion with `new`.
+    This value is set on initialization with `new`.
     '''
     player_1_transition_times: Deque[float]
 
@@ -366,7 +367,7 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
             intermediate_state.add_p2(float(b_j), float(k_j))
             p2_index -= 1
 
-    print("a_1 = {:.3f} b_1 = {:.3f}".format(
+    print("a_1 = {:.5f} b_1 = {:.5f}".format(
         intermediate_state.player_1_transition_times[0],
         intermediate_state.player_2_transition_times[0],
     ))
@@ -452,7 +453,7 @@ def compute_strategy(
 
         t = Symbol('t', real=True)
         '''
-        piece_action_density is a(possible piecewise - defined) probability
+        piece_action_density is a (possibly piecewise-defined) probability
         density function, and we need to integrate it to compute the
         cumulative density function.
 
@@ -513,7 +514,7 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
 
     # Otherwise, binary search for an alpha/beta
     searching_for_beta = b1 < a1
-    print('Binary searching for ' + ('beta' if searching_for_beta else 'apha'))
+    print('Binary searching for ' + ('beta' if searching_for_beta else 'alpha'))
     if searching_for_beta:
         def test(beta_value):
             new_state = compute_as_and_bs(
@@ -521,7 +522,7 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
             )
             new_a1 = new_state.player_1_transition_times[0]
             new_b1 = new_state.player_2_transition_times[0]
-            found = abs(new_a1 - new_b1) < EPSILON
+            found = abs(new_a1 - new_b1) < SEARCH_EPSILON
             return BinarySearchHint(found=found, tooLow=new_b1 < new_a1)
     else:  # searching for alpha
         def test(alpha_value):
@@ -530,7 +531,7 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
             )
             new_a1 = new_state.player_1_transition_times[0]
             new_b1 = new_state.player_2_transition_times[0]
-            found = abs(new_a1 - new_b1) < EPSILON
+            found = abs(new_a1 - new_b1) < SEARCH_EPSILON
             return BinarySearchHint(found=found, tooLow=new_a1 < new_b1)
 
     search_result = binary_search(
@@ -550,14 +551,5 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
     player_strategies = compute_player_strategies(
         silent_duel_input, intermediate_state, final_alpha, final_beta
     )
-
-    '''
-    # validate the output distributions for safety
-    for ad in player_strategies.p1_strategy.action_distributions:
-        ad.validate()
-
-    for ad in player_strategies.p2_strategy.action_distributions:
-        ad.validate()
-    '''
 
     return player_strategies

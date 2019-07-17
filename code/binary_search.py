@@ -4,7 +4,7 @@ from typing import Optional
 
 @dataclass
 class BinarySearchHint:
-    '''Class representing the inremental step of a binary search test.'''
+    '''Class representing the incremental step of a binary search test.'''
 
     '''True if the target of the search has been found.'''
     found: bool = False
@@ -28,7 +28,7 @@ class BinarySearchResult:
     value: Optional[float] = None
 
 
-def binary_search(test, param_min=0, param_max=1, tolerance=1e-9, callback=None):
+def binary_search(test, param_min=0, param_max=1, tolerance=1e-12, callback=None):
     '''
     Perform a binary search for a given parameter value.
 

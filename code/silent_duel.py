@@ -272,10 +272,10 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     p2_fstar_parameters = list(p1_transitions)[:-1]  # ignore a_{n+1} = 1
     p2_fstar = f_star(Q, P, t, p2_fstar_parameters)
     if computing_b_m:
-        p2_integrand = ((1 + beta) - (1 - beta) * P(t)) * p2_fstar
+        p2_integrand = ((1 + beta) - (1 - beta) * Q(t)) * p2_fstar
         p2_integral_target = 2 * (1 - beta)
     else:
-        p2_integrand = (1 - P(t)) * p2_fstar
+        p2_integrand = (1 - Q(t)) * p2_fstar
         p2_integral_target = 1 / intermediate_state.player_2_normalizing_constants[0]
 
     b_j_integral = Integral(p2_integrand, (t, b_j, b_j_plus_one))

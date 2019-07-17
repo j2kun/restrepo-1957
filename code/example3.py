@@ -1,8 +1,6 @@
 from silent_duel import *
 
-from sympy import Expr
 from sympy import Lambda
-from sympy import N
 from sympy import Symbol
 
 
@@ -12,10 +10,12 @@ Q = Lambda((x,), x**2)
 
 duel_input = SilentDuelInput(
     player_1_action_count=3,
-    player_2_action_count=4,
+    player_2_action_count=3,
     player_1_action_success=P,
     player_2_action_success=Q,
 )
 
+print("Input: {}".format(duel_input))
 output = optimal_strategies(duel_input)
-output.validate(err_on_fail=False)
+print(output)
+output.validate()

@@ -238,7 +238,7 @@ def f_star(player_action_success: SuccessFn,
 
     product = 1
     for a in larger_transition_times:
-        product *= (1 - P(a))
+        product *= (1 - Q(a))
 
     return (
         product * diff(Q(variable), variable) / (Q(variable)**2 * P(variable))

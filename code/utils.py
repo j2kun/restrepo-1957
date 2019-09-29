@@ -1,4 +1,5 @@
 from sympy.solvers import solve
+from sympy import Piecewise
 
 
 def solve_unique_real(expr, var, solution_min=0, solution_max=1):
@@ -20,6 +21,27 @@ def solve_unique_real(expr, var, solution_min=0, solution_max=1):
 
     assert len(solutions) == 1, "Expected unique solution but found {}".format(solutions)
     return float(solutions[0])
+
+
+def mask_piecewise(F, variable, domain_start, domain_end):
+    '''
+    Given a piecewise, add conditions (0, variable < domain_start)
+    and (0, variable > domain_end)
+
+    Assumes the piecewise given as input has conditions specified
+    only by their upper bound. (very specific to this project)
+    '''
+    expr_domain_pairs = F.as_expr_set_pairs()
+    pieces = [(0, variable < domain_start)]
+
+    for (expr, interval) in expr_domain_pairs:
+        if interval.end < domain_start or interval.start > domain_end:
+            continue
+        upper_bound = domain_end if interval.end > domain_end else interval.end
+        pieces.append((expr, variable < upper_bound))
+
+    pieces.append((0, variable > domain_end))
+    return Piecewise(*pieces)
 
 
 def subsequent_pairs(the_iterable):

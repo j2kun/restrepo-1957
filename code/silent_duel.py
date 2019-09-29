@@ -356,8 +356,10 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
         #
         # I resolve this by keeping both parameters when a_i == b_j.
         if abs(a_i - b_j) < EPSILON and p1_index > 0 and p2_index > 0:
-            intermediate_state.add_p1(float(a_i), float(h_i))
-            intermediate_state.add_p2(float(b_j), float(k_j))
+            # use the average of the two to avoid roundoff errors
+            transition = (a_i + b_j) / 2
+            intermediate_state.add_p1(float(transition), float(h_i))
+            intermediate_state.add_p2(float(transition), float(k_j))
             p1_index -= 1
             p2_index -= 1
         elif (a_i > b_j and p1_index > 0) or p2_index == 0:

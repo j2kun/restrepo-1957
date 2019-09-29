@@ -9,8 +9,8 @@ P = Lambda((x,), x)
 Q = Lambda((x,), x**2)
 
 duel_input = SilentDuelInput(
-    player_1_action_count=3,
-    player_2_action_count=3,
+    player_1_action_count=2,
+    player_2_action_count=2,
     player_1_action_success=P,
     player_2_action_success=Q,
 )

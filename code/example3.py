@@ -18,4 +18,4 @@ duel_input = SilentDuelInput(
 print("Input: {}".format(duel_input))
 output = optimal_strategies(duel_input)
 print(output)
-output.validate()
+output.validate(err_on_fail=False)

@@ -31,11 +31,18 @@ def mask_piecewise(F, variable, domain_start, domain_end):
     Assumes the piecewise given as input has conditions specified
     only by their upper bound. (very specific to this project)
     '''
+    F = F.simplify()
+    if not isinstance(F, Piecewise):
+        return Piecewise(
+            (0, variable < domain_start),
+            (0, variable > domain_end),
+            (F, True)
+        )
     expr_domain_pairs = F.as_expr_set_pairs()
     pieces = [(0, variable < domain_start)]
 
     for (expr, interval) in expr_domain_pairs:
-        if interval.end < domain_start or interval.start > domain_end:
+        if interval.end <= domain_start or interval.start >= domain_end:
             continue
         upper_bound = domain_end if interval.end > domain_end else interval.end
         pieces.append((expr, variable < upper_bound))
@@ -66,3 +73,14 @@ def subsequent_pairs(the_iterable):
             pair_second = next(it)
         except StopIteration:
             return
+
+
+def integrate(expr, variable, lower, upper):
+    ''' Integrate a possibly piecewise function. '''
+    expr = expr.simplify()
+    if isinstance(expr, Piecewise):
+        F = expr.piecewise_integrate(variable)
+        integrated = F.subs(variable, upper) - F.subs(variable, lower)
+        return integrated.simplify()
+    else:
+        return expr.integrate((variable, lower, upper))

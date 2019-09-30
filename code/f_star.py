@@ -17,6 +17,22 @@ SuccessFn = NewType('SuccessFn', Lambda)
 EPSILON = 1e-12
 
 
+def simple_f_star(player_action_success: SuccessFn,
+                  opponent_action_success: SuccessFn,
+                  variable: Symbol,
+                  larger_transition_times: Iterable[float]) -> Expr:
+    P: SuccessFn = player_action_success
+    Q: SuccessFn = opponent_action_success
+
+    non_product_term = diff(Q(variable), variable) / (Q(variable)**2 * P(variable))
+
+    product = 1
+    for b in larger_transition_times:
+        product *= (1 - Q(b))
+
+    return product * non_product_term
+
+
 def f_star(player_action_success: SuccessFn,
            opponent_action_success: SuccessFn,
            variable: Symbol,

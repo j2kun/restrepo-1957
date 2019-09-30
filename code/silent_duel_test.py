@@ -107,9 +107,12 @@ def test_symmetric_duel_output_distributions():
         assert_that(actual_ad.point_mass).is_equal_to(0)
 
         cdf = actual_ad.cumulative_density_function.expr
-        for (expr, interval) in cdf.as_expr_set_pairs():
-            if expr.is_Atom:
+        expr_intervals = cdf.as_expr_set_pairs()
+        for (j, (expr, interval)) in enumerate(expr_intervals):
+            if j == 0:
                 assert_that(float(expr)).is_equal_to(0.0)
+            elif j == len(expr_intervals) - 1:
+                assert_that(float(expr)).is_equal_to(1.0)
             else:
                 if isinstance(expr, Lambda):
                     expr = expr.expr

@@ -18,6 +18,10 @@ from sympy.solvers import solve
 
 from binary_search import BinarySearchHint
 from binary_search import binary_search
+from f_star import f_star
+from f_star import simple_f_star
+from utils import integrate
+from utils import mask_piecewise
 from utils import solve_unique_real
 from utils import subsequent_pairs
 
@@ -220,31 +224,6 @@ for each player.
 """
 
 
-def f_star(player_action_success: SuccessFn,
-           opponent_action_success: SuccessFn,
-           variable: Symbol,
-           larger_transition_times: Iterable[float]) -> Expr:
-    '''Compute f^* as in Restrepo '57.
-
-    The inputs can be chosen so that the appropriate f^* is built
-    for either player. I.e., if we want to compute f^* for player 1,
-    player_action_success should correspond to P, opponent_action_success
-    to Q, and larger_transition_times to the b_j.
-
-    If the inputs are switched appropriately, f^* is computed for player 2.
-    '''
-    P: SuccessFn = player_action_success
-    Q: SuccessFn = opponent_action_success
-
-    product = 1
-    for a in larger_transition_times:
-        product *= (1 - Q(a))
-
-    return (
-        product * diff(Q(variable), variable) / (Q(variable)**2 * P(variable))
-    )
-
-
 def compute_ai_and_bj(duel_input: SilentDuelInput,
                       intermediate_state: IntermediateState,
                       alpha: float = 0,
@@ -277,7 +256,7 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     computing_b_m = b_j_plus_one == 1
 
     p1_fstar_parameters = list(p2_transitions)[:-1]  # ignore b_{m+1} = 1
-    p1_fstar = f_star(P, Q, t, p1_fstar_parameters)
+    p1_fstar = simple_f_star(P, Q, t, p1_fstar_parameters)
     # the a_i part
     if computing_a_n:
         p1_integrand = ((1 + alpha) - (1 - alpha) * P(t)) * p1_fstar
@@ -286,8 +265,7 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
         p1_integrand = (1 - P(t)) * p1_fstar
         p1_integral_target = 1 / intermediate_state.player_1_normalizing_constants[0]
 
-    a_i_integral = Integral(p1_integrand, (t, a_i, a_i_plus_one))
-    a_i_integrated = a_i_integral.doit()
+    a_i_integrated = integrate(p1_integrand, t, a_i, a_i_plus_one)
     a_i = solve_unique_real(
         a_i_integrated - p1_integral_target,
         a_i,
@@ -297,7 +275,7 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
 
     # the b_j part
     p2_fstar_parameters = list(p1_transitions)[:-1]  # ignore a_{n+1} = 1
-    p2_fstar = f_star(Q, P, t, p2_fstar_parameters)
+    p2_fstar = simple_f_star(Q, P, t, p2_fstar_parameters)
     if computing_b_m:
         p2_integrand = ((1 + beta) - (1 - beta) * Q(t)) * p2_fstar
         p2_integral_target = 2 * (1 - beta)
@@ -305,8 +283,7 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
         p2_integrand = (1 - Q(t)) * p2_fstar
         p2_integral_target = 1 / intermediate_state.player_2_normalizing_constants[0]
 
-    b_j_integral = Integral(p2_integrand, (t, b_j, b_j_plus_one))
-    b_j_integrated = b_j_integral.doit()
+    b_j_integrated = integrate(p2_integrand, t, b_j, b_j_plus_one)
     b_j = solve_unique_real(
         b_j_integrated - p2_integral_target,
         b_j,
@@ -315,14 +292,12 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     )
 
     # the h_i part
-    h_i_integral = Integral(p1_fstar, (t, a_i, a_i_plus_one))
-    h_i_integrated = h_i_integral.doit()
+    h_i_integrated = integrate(p1_fstar, t, a_i, a_i_plus_one)
     h_i_numerator = (1 - alpha) if computing_a_n else 1
     h_i = h_i_numerator / h_i_integrated
 
     # the k_j part
-    k_j_integral = Integral(p2_fstar, (t, b_j, b_j_plus_one))
-    k_j_integrated = k_j_integral.doit()
+    k_j_integrated = integrate(p2_fstar, t, b_j, b_j_plus_one)
     k_j_numerator = (1 - beta) if computing_b_m else 1
     k_j = k_j_numerator / k_j_integrated
 
@@ -376,56 +351,6 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
     return intermediate_state
 
 
-def compute_piecewise_action_density(
-        action_start: float,
-        action_end: float,
-        opponent_transition_times: List[float],
-        normalizing_constant: float,
-        player_action_success: SuccessFn,
-        opponent_action_success: SuccessFn,
-        variable: Symbol):
-    # The density function is a piecewise h_i * f^* with discontinuities
-    # at the values of opponent_transition_times contained in the interval.
-    # Thus, we construct a piecewise function whose pieces correspond to
-    # all the b_j that split the interval (a_i, a_{i+1}).
-    piecewise_components = [(0, variable < action_start), (0, action_end < variable)]
-
-    def add_piece(expr, variable, piece_start, piece_end):
-        piecewise_components.append((expr, variable < piece_end))
-
-    # chop off the last entry, which is always 1
-    opponent_transition_times = list(opponent_transition_times)[:-1]
-
-    piece_start = action_start
-    piece_end = action_end
-    for b_j in opponent_transition_times:
-        if action_start + EPSILON < b_j < action_end - EPSILON:
-            # break into a new piece
-            piece_end = b_j
-            larger_transition_times = [x for x in opponent_transition_times if x >= b_j - EPSILON]
-            piece_fstar = f_star(
-                player_action_success,
-                opponent_action_success,
-                variable,
-                larger_transition_times,
-            )
-            add_piece(normalizing_constant * piece_fstar, variable, piece_start, piece_end)
-            piece_start = b_j
-            piece_end = action_end
-
-    # at the end, add the last piece, which may be the only piece
-    larger_transition_times = [x for x in opponent_transition_times if x >= action_end - EPSILON]
-    piece_fstar = f_star(
-        player_action_success,
-        opponent_action_success,
-        variable,
-        larger_transition_times,
-    )
-
-    add_piece(normalizing_constant * piece_fstar, variable, piece_start, piece_end)
-    return Piecewise(*piecewise_components)
-
-
 def compute_strategy(
         player_action_success: SuccessFn,
         player_transition_times: List[float],
@@ -438,44 +363,39 @@ def compute_strategy(
     density functions for the optimal strategy of the player.
     '''
     action_distributions = []
+    x = Symbol('x', real=True)
+    t = Symbol('t', real=True)
+
+    # chop off the last transition time, which is always 1
+    opponent_transition_times = [
+        x for x in opponent_transition_times if x < 1
+    ]
 
     pairs = subsequent_pairs(player_transition_times)
     for (i, (action_start, action_end)) in enumerate(pairs):
         normalizing_constant = player_normalizing_constants[i]
-        x = Symbol('x', real=True)
-        piecewise_action_density = compute_piecewise_action_density(
-            action_start,
-            action_end,
-            opponent_transition_times,
-            normalizing_constant,
+
+        dF = normalizing_constant * f_star(
             player_action_success,
             opponent_action_success,
             x,
+            opponent_transition_times,
         )
-
-        t = Symbol('t', real=True)
-        '''
-        piece_action_density is a (possibly piecewise-defined) probability
-        density function, and we need to integrate it to compute the
-        cumulative density function.
-
-        Integrating the whole function in one go will cause Sympy to use
-        strange groupings and Min, which then gets Heaviside involved and
-        reduces readability (IMO). piecewise_integrate seems to avoid this.
-
-        Note piecewise_integrate doesn't replace the endpoints of a piecewise
-        function's pieces, so we apply subs(x, t) to the output to update the
-        domain endpoints. This has no effect on the function because there are
-        no x's left after integrating.
-        '''
-        integrated = piecewise_action_density.piecewise_integrate(
-            (x, action_start, t)).subs(x, t)
-        piece_cdf = Lambda((t,), integrated)
+        piece_pdf = mask_piecewise(dF, x, action_start, action_end)
+        piece_cdf = integrate(piece_pdf, x, action_start, t)
+        piece_cdf = mask_piecewise(
+            piece_cdf,
+            t,
+            action_start,
+            action_end,
+            before_domain_val=0,
+            after_domain_val=1
+        )
 
         action_distributions.append(ActionDistribution(
             support_start=action_start,
             support_end=action_end,
-            cumulative_density_function=piece_cdf
+            cumulative_density_function=Lambda((t,), piece_cdf),
         ))
 
     action_distributions[-1].point_mass = time_1_point_mass

@@ -23,7 +23,7 @@ def solve_unique_real(expr, var, solution_min=0, solution_max=1):
     return float(solutions[0])
 
 
-def mask_piecewise(F, variable, domain_start, domain_end):
+def mask_piecewise(F, variable, domain_start, domain_end, before_domain_val=0, after_domain_val=0):
     '''
     Given a piecewise, add conditions (0, variable < domain_start)
     and (0, variable > domain_end)
@@ -34,12 +34,12 @@ def mask_piecewise(F, variable, domain_start, domain_end):
     F = F.simplify()
     if not isinstance(F, Piecewise):
         return Piecewise(
-            (0, variable < domain_start),
-            (0, variable > domain_end),
+            (before_domain_val, variable < domain_start),
+            (after_domain_val, variable > domain_end),
             (F, True)
         )
     expr_domain_pairs = F.as_expr_set_pairs()
-    pieces = [(0, variable < domain_start)]
+    pieces = [(before_domain_val, variable < domain_start)]
 
     for (expr, interval) in expr_domain_pairs:
         if interval.end <= domain_start or interval.start >= domain_end:
@@ -47,7 +47,7 @@ def mask_piecewise(F, variable, domain_start, domain_end):
         upper_bound = domain_end if interval.end > domain_end else interval.end
         pieces.append((expr, variable < upper_bound))
 
-    pieces.append((0, variable > domain_end))
+    pieces.append((after_domain_val, variable > domain_end))
     return Piecewise(*pieces)
 
 

@@ -2,7 +2,7 @@ from sympy.solvers import solve
 from sympy import Piecewise
 
 
-def solve_unique_real(expr, var, solution_min=0, solution_max=1):
+def solve_unique_real(expr, var, solution_min=0, solution_max=1, allow_no_solutions=False):
     '''
     Solve an equation and return any solution in the given range. This should
     be used when the caller knows that there is a unique solution to the
@@ -11,16 +11,36 @@ def solve_unique_real(expr, var, solution_min=0, solution_max=1):
     If the range bounds are set to None, then the assumption is that there is a
     unique global real solution. By default the range bound is [0,1].
     '''
-    # print("solving {} = 0 for {}".format(expr, var))
-    solutions = solve(expr, var, minimal=True, quick=True)
-    solutions = [x for x in solutions if x.is_real]
+    expr = expr.simplify()
+    if isinstance(expr, Piecewise):
+        '''sympy often fails to solve equations that are piecewise, even
+        if the other pieces are trivial like constants or zero.'''
+        pieces = [x[0] for x in expr.args if not x[0].is_constant()]
+        sol_sets = [
+            solve_unique_real(
+                expr=e,
+                var=var,
+                solution_min=solution_min,
+                solution_max=solution_max,
+                allow_no_solutions=True)
+            for e in pieces
+        ]
+        solutions = [sol for sol_set in sol_sets for sol in sol_set]
+    else:
+        solutions = solve(expr, var, minimal=True, quick=True)
+        solutions = [x for x in solutions if x.is_real]
+
     if solution_min is not None:
         solutions = [x for x in solutions if x >= solution_min]
     if solution_max is not None:
         solutions = [x for x in solutions if x <= solution_max]
 
-    assert len(solutions) == 1, "Expected unique solution but found {}".format(solutions)
-    return float(solutions[0])
+    if allow_no_solutions:
+        assert len(solutions) in [0, 1], "Expected unique solution but found {}".format(solutions)
+        return [float(x) for x in solutions]
+    else:
+        assert len(solutions) == 1, "Expected unique solution but found {}".format(solutions)
+        return float(solutions[0])
 
 
 def mask_piecewise(F, variable, domain_start, domain_end, before_domain_val=0, after_domain_val=0):
@@ -34,7 +54,7 @@ def mask_piecewise(F, variable, domain_start, domain_end, before_domain_val=0, a
     F = F.simplify()
     if not isinstance(F, Piecewise):
         return Piecewise(
-            (before_domain_val, variable < domain_start),
+            (before_domain_val, variable <= domain_start),
             (after_domain_val, variable >= domain_end),
             (F, True)
         )

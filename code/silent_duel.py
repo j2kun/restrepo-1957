@@ -255,7 +255,6 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
 
     p1_fstar_parameters = list(p2_transitions)[:-1]  # ignore b_{m+1} = 1
     p1_fstar = f_star(P, Q, t, p1_fstar_parameters)
-    p1_fstar = mask_piecewise(p1_fstar, t, 0, a_i_plus_one)
     # the a_i part
     if computing_a_n:
         p1_integrand = ((1 + alpha) - (1 - alpha) * P(t)) * p1_fstar
@@ -264,7 +263,8 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
         p1_integrand = (1 - P(t)) * p1_fstar
         p1_integral_target = 1 / intermediate_state.player_1_normalizing_constants[0]
 
-    a_i_integrated = p1_integrand.simplify().integrate((t, a_i, a_i_plus_one))
+    p1_integrand = mask_piecewise(p1_integrand, t, 0, a_i_plus_one)
+    a_i_integrated = p1_integrand.integrate((t, a_i, a_i_plus_one))
     a_i = solve_unique_real(
         a_i_integrated - p1_integral_target,
         a_i,
@@ -275,7 +275,6 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     # the b_j part
     p2_fstar_parameters = list(p1_transitions)[:-1]  # ignore a_{n+1} = 1
     p2_fstar = f_star(Q, P, t, p2_fstar_parameters)
-    p2_fstar = mask_piecewise(p2_fstar, t, 0, b_j_plus_one)
     if computing_b_m:
         p2_integrand = ((1 + beta) - (1 - beta) * Q(t)) * p2_fstar
         p2_integral_target = 2 * (1 - beta)
@@ -283,7 +282,9 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
         p2_integrand = (1 - Q(t)) * p2_fstar
         p2_integral_target = 1 / intermediate_state.player_2_normalizing_constants[0]
 
-    b_j_integrated = p2_integrand.simplify().integrate((t, b_j, b_j_plus_one))
+    # b_j_integrated = p2_integrand.simplify().integrate((t, b_j, b_j_plus_one))
+    p2_integrand = mask_piecewise(p2_integrand, t, 0, b_j_plus_one)
+    b_j_integrated = p2_integrand.integrate((t, b_j, b_j_plus_one))
     b_j = solve_unique_real(
         b_j_integrated - p2_integral_target,
         b_j,
@@ -375,12 +376,12 @@ def compute_strategy(
     for (i, (action_start, action_end)) in enumerate(pairs):
         normalizing_constant = player_normalizing_constants[i]
 
-        dF = normalizing_constant * f_star(
+        dF = (normalizing_constant * f_star(
             player_action_success,
             opponent_action_success,
             x,
             opponent_transition_times,
-        )
+        )).simplify()
         piece_pdf = mask_piecewise(dF, x, action_start, action_end)
 
         # piecewise_integrate does not replace the variable in the bounds of

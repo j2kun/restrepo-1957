@@ -19,13 +19,14 @@ from sympy.solvers import solve
 from binary_search import BinarySearchHint
 from binary_search import binary_search
 from f_star import f_star
+from parameters import EPSILON
+from parameters import SEARCH_EPSILON
+from parameters import VALIDATION_EPSILON
 from utils import mask_piecewise
 from utils import solve_unique_real
 from utils import subsequent_pairs
 
 SuccessFn = NewType('SuccessFn', Lambda)
-EPSILON = 1e-12
-SEARCH_EPSILON = 1e-6
 
 
 def DEFAULT_RNG():
@@ -89,7 +90,7 @@ class ActionDistribution:
         '''Ensure the action distribution has probability summing to 1.'''
         df = diff(self.cumulative_density_function(self.t), self.t)
         total_prob_in_support = N(Integral(df, (self.t, self.support_start, self.support_end)).doit())
-        result = abs(self.point_mass + total_prob_in_support - 1) < EPSILON
+        result = abs(self.point_mass + total_prob_in_support - 1) < VALIDATION_EPSILON
         result_str = '' if result else 'INVALID'
         print("Validating. prob_mass={} point_mass={}   {}".format(
             total_prob_in_support, self.point_mass, result_str))
@@ -253,18 +254,20 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     computing_a_n = a_i_plus_one == 1
     computing_b_m = b_j_plus_one == 1
 
-    p1_fstar_parameters = list(p2_transitions)[:-1]  # ignore b_{m+1} = 1
-    p1_fstar = f_star(P, Q, t, p1_fstar_parameters)
     # the a_i part
     if computing_a_n:
-        p1_integrand = ((1 + alpha) - (1 - alpha) * P(t)) * p1_fstar
+        p1_scaling_factor = ((1 + alpha) - (1 - alpha) * P(t))
         p1_integral_target = 2 * (1 - alpha)
     else:
-        p1_integrand = (1 - P(t)) * p1_fstar
+        p1_scaling_factor = (1 - P(t))
         p1_integral_target = 1 / intermediate_state.player_1_normalizing_constants[0]
 
+    p1_fstar_parameters = list(p2_transitions)[:-1]  # ignore b_{m+1} = 1
+    p1_integrand = f_star(P, Q, t, p1_fstar_parameters, scale_by=p1_scaling_factor)
     p1_integrand = mask_piecewise(p1_integrand, t, 0, a_i_plus_one)
-    a_i_integrated = p1_integrand.integrate((t, a_i, a_i_plus_one))
+
+    a_i_integrated = p1_integrand.piecewise_integrate((t, a_i, a_i_plus_one))
+    a_i_integrated = a_i_integrated.subs(t, a_i)
     a_i = solve_unique_real(
         a_i_integrated - p1_integral_target,
         a_i,
@@ -273,18 +276,19 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     )
 
     # the b_j part
-    p2_fstar_parameters = list(p1_transitions)[:-1]  # ignore a_{n+1} = 1
-    p2_fstar = f_star(Q, P, t, p2_fstar_parameters)
     if computing_b_m:
-        p2_integrand = ((1 + beta) - (1 - beta) * Q(t)) * p2_fstar
+        p2_scaling_factor = ((1 + beta) - (1 - beta) * Q(t))
         p2_integral_target = 2 * (1 - beta)
     else:
-        p2_integrand = (1 - Q(t)) * p2_fstar
+        p2_scaling_factor = (1 - Q(t))
         p2_integral_target = 1 / intermediate_state.player_2_normalizing_constants[0]
 
-    # b_j_integrated = p2_integrand.simplify().integrate((t, b_j, b_j_plus_one))
+    p2_fstar_parameters = list(p1_transitions)[:-1]  # ignore a_{n+1} = 1
+    p2_integrand = f_star(Q, P, t, p2_fstar_parameters, scale_by=p2_scaling_factor)
     p2_integrand = mask_piecewise(p2_integrand, t, 0, b_j_plus_one)
-    b_j_integrated = p2_integrand.integrate((t, b_j, b_j_plus_one))
+
+    b_j_integrated = p2_integrand.piecewise_integrate((t, b_j, b_j_plus_one))
+    b_j_integrated = b_j_integrated.subs(t, b_j)
     b_j = solve_unique_real(
         b_j_integrated - p2_integral_target,
         b_j,
@@ -293,11 +297,13 @@ def compute_ai_and_bj(duel_input: SilentDuelInput,
     )
 
     # the h_i part
+    p1_fstar = f_star(P, Q, t, p1_fstar_parameters, scale_by=1)
     h_i_integrated = p1_fstar.integrate((t, a_i, a_i_plus_one))
     h_i_numerator = (1 - alpha) if computing_a_n else 1
     h_i = h_i_numerator / h_i_integrated
 
     # the k_j part
+    p2_fstar = f_star(Q, P, t, p2_fstar_parameters, scale_by=1)
     k_j_integrated = p2_fstar.integrate((t, b_j, b_j_plus_one))
     k_j_numerator = (1 - beta) if computing_b_m else 1
     k_j = k_j_numerator / k_j_integrated
@@ -369,19 +375,20 @@ def compute_strategy(
 
     # chop off the last transition time, which is always 1
     opponent_transition_times = [
-        x for x in opponent_transition_times if x < 1
+        x for x in opponent_transition_times if x < 1 - EPSILON
     ]
 
     pairs = subsequent_pairs(player_transition_times)
     for (i, (action_start, action_end)) in enumerate(pairs):
         normalizing_constant = player_normalizing_constants[i]
 
-        dF = (normalizing_constant * f_star(
+        dF = f_star(
             player_action_success,
             opponent_action_success,
             x,
             opponent_transition_times,
-        )).simplify()
+            scale_by=normalizing_constant
+        )
         piece_pdf = mask_piecewise(dF, x, action_start, action_end)
 
         # piecewise_integrate does not replace the variable in the bounds of

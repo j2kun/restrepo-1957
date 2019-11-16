@@ -36,7 +36,8 @@ def simple_f_star(player_action_success: SuccessFn,
 def f_star(player_action_success: SuccessFn,
            opponent_action_success: SuccessFn,
            variable: Symbol,
-           opponent_transition_times: Iterable[float]) -> Expr:
+           opponent_transition_times: Iterable[float],
+           scale_by: Expr = 1) -> Expr:
     '''Compute f^* as in Restrepo '57.
 
     The inputs can be chosen so that the appropriate f^* is built
@@ -60,7 +61,12 @@ def f_star(player_action_success: SuccessFn,
              .
     [1] *  Q'(t) / Q^2(t) P(t)                        if t >= b_m
     '''
-    non_product_term = diff(Q(variable), variable) / (Q(variable)**2 * P(variable))
+    non_product_term = (
+        scale_by
+        * diff(Q(variable), variable)
+        / (Q(variable)**2 * P(variable))
+    )
+
     piecewise_components = []
     for i, b_j in enumerate(opponent_transition_times):
         larger_transition_times = opponent_transition_times[i:]

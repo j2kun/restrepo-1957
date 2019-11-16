@@ -1,9 +1,14 @@
 from sympy import Piecewise
+from sympy import S
 from sympy import nsimplify
-from sympy.solvers import solve
+from sympy import solveset
+from scipy.optimize import fsolve
+
+from parameters import VALIDATION_EPSILON
+from parameters import SEARCH_EPSILON
 
 
-def solve_unique_real(expr, var, solution_min=0, solution_max=1, allow_no_solutions=False):
+def solve_unique_real(expr, var, solution_min=0, solution_max=1):
     '''
     Solve an equation and return any solution in the given range. This should
     be used when the caller knows that there is a unique solution to the
@@ -20,20 +25,20 @@ def solve_unique_real(expr, var, solution_min=0, solution_max=1, allow_no_soluti
 
     Cf. https://github.com/sympy/sympy/issues/17890
     '''
-    solutions = solve(nsimplify(expr, rational=True, tolerance=0.0001), var)
-    solutions = [x for x in solutions if x.is_real]
+    def f(x):
+        return expr.subs(var, x).evalf()
+    solution_data = fsolve(
+        f,
+        (solution_min + solution_max / 2),
+        xtol=SEARCH_EPSILON
+    )
 
-    if solution_min is not None:
-        solutions = [x for x in solutions if x >= solution_min]
-    if solution_max is not None:
-        solutions = [x for x in solutions if x <= solution_max]
+    if len(solution_data) > 1:
+        print(expr)
+        print(solution_data)
 
-    if allow_no_solutions:
-        assert len(solutions) in [0, 1], "Expected unique solution but found {}".format(solutions)
-        return [float(x) for x in solutions]
-    else:
-        assert len(solutions) == 1, "Expected unique solution but found {}".format(solutions)
-        return float(solutions[0])
+    solution = solution_data[0]
+    return solution
 
 
 def mask_piecewise(F, variable, domain_start, domain_end, before_domain_val=0, after_domain_val=0):
@@ -47,15 +52,21 @@ def mask_piecewise(F, variable, domain_start, domain_end, before_domain_val=0, a
     if not isinstance(F, Piecewise):
         return Piecewise(
             (before_domain_val, variable <= domain_start),
-            (after_domain_val, variable >= domain_end),
-            (F, True)
+            (F, variable < domain_end),
+            (after_domain_val, True),
         )
+
     expr_domain_pairs = F.as_expr_set_pairs()
     pieces = [(before_domain_val, variable < domain_start)]
 
     for (expr, interval) in expr_domain_pairs:
         if interval.end <= domain_start or interval.start >= domain_end:
             continue
+        if abs(interval.end - domain_start) < VALIDATION_EPSILON:
+            continue
+        if abs(interval.start - domain_end) < VALIDATION_EPSILON:
+            continue
+
         upper_bound = domain_end if interval.end > domain_end else interval.end
         pieces.append((expr, variable < upper_bound))
 

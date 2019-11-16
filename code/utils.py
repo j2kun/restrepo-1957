@@ -1,5 +1,6 @@
-from sympy.solvers import solve
 from sympy import Piecewise
+from sympy import nsimplify
+from sympy.solvers import solve
 
 
 def solve_unique_real(expr, var, solution_min=0, solution_max=1, allow_no_solutions=False):
@@ -11,24 +12,16 @@ def solve_unique_real(expr, var, solution_min=0, solution_max=1, allow_no_soluti
     If the range bounds are set to None, then the assumption is that there is a
     unique global real solution. By default the range bound is [0,1].
     '''
-    expr = expr.simplify()
-    if isinstance(expr, Piecewise):
-        '''sympy often fails to solve equations that are piecewise, even
-        if the other pieces are trivial like constants or zero.'''
-        pieces = [x[0] for x in expr.args if not x[0].is_constant()]
-        sol_sets = [
-            solve_unique_real(
-                expr=e,
-                var=var,
-                solution_min=solution_min,
-                solution_max=solution_max,
-                allow_no_solutions=True)
-            for e in pieces
-        ]
-        solutions = [sol for sol_set in sol_sets for sol in sol_set]
-    else:
-        solutions = solve(expr, var, minimal=True, quick=True)
-        solutions = [x for x in solutions if x.is_real]
+
+    '''
+    Sympy often fails to solve piecewise functions. The use of nsimplify below
+    converts the floating point expressions into rational approximations, which
+    makes it easier for the solver to run.
+
+    Cf. https://github.com/sympy/sympy/issues/17890
+    '''
+    solutions = solve(nsimplify(expr, rational=True, tolerance=0.0001), var)
+    solutions = [x for x in solutions if x.is_real]
 
     if solution_min is not None:
         solutions = [x for x in solutions if x >= solution_min]
@@ -51,7 +44,6 @@ def mask_piecewise(F, variable, domain_start, domain_end, before_domain_val=0, a
     Assumes the piecewise given as input has conditions specified
     only by their upper bound. (very specific to this project)
     '''
-    F = F.simplify()
     if not isinstance(F, Piecewise):
         return Piecewise(
             (before_domain_val, variable <= domain_start),

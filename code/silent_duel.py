@@ -14,7 +14,6 @@ from sympy import N
 from sympy import Piecewise
 from sympy import Symbol
 from sympy import diff
-from sympy.solvers import solve
 
 from binary_search import BinarySearchHint
 from binary_search import binary_search
@@ -337,7 +336,7 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
         # the previous a_n, then it will produce the wrong value.
         #
         # I resolve this by keeping both parameters when a_i == b_j.
-        if abs(a_i - b_j) < EPSILON and p1_index > 0 and p2_index > 0:
+        if abs(a_i - b_j) < VALIDATION_EPSILON and p1_index > 0 and p2_index > 0:
             # use the average of the two to avoid roundoff errors
             transition = (a_i + b_j) / 2
             intermediate_state.add_p1(float(transition), float(h_i))
@@ -351,7 +350,7 @@ def compute_as_and_bs(duel_input: SilentDuelInput,
             intermediate_state.add_p2(float(b_j), float(k_j))
             p2_index -= 1
 
-    print("a_1 = {:.5f} b_1 = {:.5f}".format(
+    print("a_1 = {:.8f}\nb_1 = {:.8f}".format(
         intermediate_state.player_1_transition_times[0],
         intermediate_state.player_2_transition_times[0],
     ))
@@ -440,7 +439,7 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
     a1 = intermediate_state.player_1_transition_times[0]
     b1 = intermediate_state.player_2_transition_times[0]
 
-    if abs(a1 - b1) < EPSILON:
+    if abs(a1 - b1) < SEARCH_EPSILON:
         return compute_player_strategies(
             silent_duel_input, intermediate_state, alpha=0, beta=0,
         )
@@ -457,7 +456,7 @@ def optimal_strategies(silent_duel_input: SilentDuelInput) -> SilentDuelOutput:
             new_b1 = new_state.player_2_transition_times[0]
             found = abs(new_a1 - new_b1) < SEARCH_EPSILON
             return BinarySearchHint(found=found, tooLow=new_b1 < new_a1)
-    else:  # searching for alpha
+    else:
         def test(alpha_value):
             new_state = compute_as_and_bs(
                 silent_duel_input, alpha=alpha_value, beta=0

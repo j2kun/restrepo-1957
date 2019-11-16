@@ -11,10 +11,8 @@ from sympy import Lambda
 from sympy import Piecewise
 from sympy import Symbol
 from sympy import diff
-from sympy.solvers import solve
 
 SuccessFn = NewType('SuccessFn', Lambda)
-EPSILON = 1e-12
 
 
 def simple_f_star(player_action_success: SuccessFn,
@@ -62,9 +60,7 @@ def f_star(player_action_success: SuccessFn,
     [1] *  Q'(t) / Q^2(t) P(t)                        if t >= b_m
     '''
     non_product_term = (
-        scale_by
-        * diff(Q(variable), variable)
-        / (Q(variable)**2 * P(variable))
+        scale_by * diff(Q(variable), variable) / (Q(variable)**2 * P(variable))
     )
 
     piecewise_components = []

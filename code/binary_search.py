@@ -48,6 +48,8 @@ def binary_search(test, param_min=0, param_max=1, tolerance=1e-12, callback=None
     current_max = param_max
 
     while current_max - current_min > tolerance:
+        if current_max - current_min < 1e-10:
+            import ipdb; ipdb.set_trace()
         tested_value = (current_max + current_min) / 2
         if callback:
             callback(dict(

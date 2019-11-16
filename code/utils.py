@@ -1,11 +1,8 @@
 from sympy import Piecewise
-from sympy import S
-from sympy import nsimplify
-from sympy import solveset
 from scipy.optimize import fsolve
 
 from parameters import VALIDATION_EPSILON
-from parameters import SEARCH_EPSILON
+from parameters import SOLVE_EPSILON
 
 
 def solve_unique_real(expr, var, solution_min=0, solution_max=1):
@@ -18,26 +15,23 @@ def solve_unique_real(expr, var, solution_min=0, solution_max=1):
     unique global real solution. By default the range bound is [0,1].
     '''
 
-    '''
-    Sympy often fails to solve piecewise functions. The use of nsimplify below
-    converts the floating point expressions into rational approximations, which
-    makes it easier for the solver to run.
-
-    Cf. https://github.com/sympy/sympy/issues/17890
-    '''
+    # sympy is a headache when it comes to solving piecewise functions
+    # since we only care about real values in a given range, default to
+    # scipy which is much faster
     def f(x):
         return expr.subs(var, x).evalf()
     solution_data = fsolve(
         f,
-        (solution_min + solution_max / 2),
-        xtol=SEARCH_EPSILON
+        (solution_min + solution_max) / 2,
+        xtol=SOLVE_EPSILON,
+        full_output=True,
     )
 
-    if len(solution_data) > 1:
+    if not solution_data[2]:
         print(expr)
         print(solution_data)
 
-    solution = solution_data[0]
+    solution = solution_data[0][0]
     return solution
 
 

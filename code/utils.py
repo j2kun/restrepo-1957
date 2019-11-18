@@ -18,21 +18,62 @@ def solve_unique_real(expr, var, solution_min=0, solution_max=1):
     # sympy is a headache when it comes to solving piecewise functions
     # since we only care about real values in a given range, default to
     # scipy which is much faster
+
+    # Update: scipy fails due to the jump discontinuities. My first idea
+    # for a workaround is to sample (epsilon-net) and only try to solve
+    # using the piecewise component that is closest to zero
+    expr = expr.simplify()
+    if isinstance(expr, Piecewise):
+        expr, guess = choose_best_component(expr, var, solution_min, solution_max)
+    else:
+        guess = (solution_min + solution_max) / 2
+
     def f(x):
         return expr.subs(var, x).evalf()
+
     solution_data = fsolve(
         f,
-        (solution_min + solution_max) / 2,
+        guess,
         xtol=SOLVE_EPSILON,
         full_output=True,
     )
 
-    if not solution_data[2]:
+    if solution_data[2] > 3:
         print(expr)
         print(solution_data)
 
     solution = solution_data[0][0]
     return solution
+
+
+def arange(start, stop, step):
+    if step <= 0 or stop <= step:
+        raise ValueError(
+            "invalid params: {} {} {}".format(start, stop, step))
+    while start < stop:
+        yield start
+        start += step
+
+
+def choose_best_component(expr, var, range_min, range_max, epsilon_net=1e-2):
+    def f(x):
+        return expr.subs(var, x).evalf()
+
+    tested_values = []
+    for test in arange(range_min, range_max, epsilon_net):
+        value = f(test)
+        if value.is_real and not value.is_infinite:
+            tested_values.append((test, f(test)))
+
+    min_test_and_value = min(tested_values, key=lambda x: abs(x[1]))
+    min_test = min_test_and_value[0]
+    for (component, domain) in expr.as_expr_set_pairs():
+        if component.is_zero:
+            continue
+        if min_test in domain:
+            return (component, min_test)
+
+    raise ValueError("min_test was {}".format(min_test))
 
 
 def mask_piecewise(F, variable, domain_start, domain_end, before_domain_val=0, after_domain_val=0):

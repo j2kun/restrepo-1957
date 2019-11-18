@@ -144,9 +144,9 @@ def test_asymmetric_duel_one_action_proper_alpha_beta():
     p1_dist = output.p1_strategy.action_distributions[0]
     p2_dist = output.p2_strategy.action_distributions[0]
 
-    assert_that(p1_dist.support_start).is_close_to(0.5, 1e-3)
-    assert_that(p2_dist.support_start).is_close_to(0.5, 1e-3)
-    assert_that(p2_dist.point_mass).is_close_to(0.0344, 1e-3)
+    assert_that(p1_dist.support_start).is_close_to(0.481, 1e-3)
+    assert_that(p2_dist.support_start).is_close_to(0.481, 1e-3)
+    assert_that(p2_dist.point_mass).is_close_to(0.0727, 1e-3)
     output.validate(err_on_fail=True)
 
 

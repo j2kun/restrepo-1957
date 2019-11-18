@@ -99,7 +99,7 @@ class ActionDistribution:
                 raise ValueError("Probability distribution does not have mass 1: {}".format(self))
 
     def __str__(self):
-        rounded_df = N(diff(self.cumulative_density_function(self.t), self.t), 2)
+        rounded_df = N(diff(self.cumulative_density_function(self.t), self.t), 8)
         s = '({:.3f}, {:.3f}): dF/dt = {}'.format(
             self.support_start,
             self.support_end,

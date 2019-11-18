@@ -97,13 +97,14 @@ def test_symmetric_duel_output_distributions():
     p2_strategy = player_strategies.p2_strategy
 
     assert_that(p1_strategy).is_equal_to(p2_strategy)
-    assert_that(p1_strategy.transition_times()).is_equal_to(expected_transitions)
+    for transition_time, expected_transition_time in zip(p1_strategy.transition_times(), expected_transitions):
+        assert_that(transition_time).is_close_to(expected_transition_time, 1e-3)
 
     for i in range(3):
         print(i)
         actual_ad = p1_strategy.action_distributions[i]
-        assert_that(actual_ad.support_start).is_equal_to(expected_transitions[i])
-        assert_that(actual_ad.support_end).is_equal_to(expected_transitions[i + 1])
+        assert_that(actual_ad.support_start).is_close_to(expected_transitions[i], 1e-3)
+        assert_that(actual_ad.support_end).is_close_to(expected_transitions[i + 1], 1e-3)
         assert_that(actual_ad.point_mass).is_equal_to(0)
 
         cdf = actual_ad.cumulative_density_function.expr

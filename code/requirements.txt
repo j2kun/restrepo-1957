@@ -5,12 +5,10 @@ attrs==19.1.0
 backcall==0.1.0
 decorator==4.3.0
 importlib-metadata==0.18
-ipdb==0.11
-ipython==7.16.3
 ipython-genutils==0.2.0
-jedi==0.13.2
 more-itertools==7.0.0
 mpmath==1.1.0
+numpy==1.23.1
 packaging==19.0
 parso==0.3.1
 pexpect==4.6.0
@@ -22,6 +20,7 @@ py==1.10.0
 Pygments==2.7.4
 pyparsing==2.4.0
 pytest==4.6.3
+scipy==1.8.1
 six==1.12.0
 sympy==1.4
 traitlets==4.3.2
